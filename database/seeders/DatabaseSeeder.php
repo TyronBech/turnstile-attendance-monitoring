@@ -13,12 +13,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Seed the admin/test user
         User::factory()->create([
+            'student_id' => '0000000000',
+            'rfid' => '0000000000',
             'first_name' => 'Test',
             'last_name' => 'User',
             'email' => 'test@example.com',
+        ]);
+
+        // Seed sample students and turnstile device with Sanctum token
+        $this->call([
+            StudentSeeder::class,
+            TurnstileSeeder::class,
         ]);
     }
 }
