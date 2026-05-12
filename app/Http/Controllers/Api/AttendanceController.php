@@ -55,9 +55,8 @@ class AttendanceController extends Controller
     private function getErrorMessage(string $code): string
     {
         return match ($code) {
+            'USER_INACTIVE' => 'This account or device is currently inactive.',
             'RFID_NOT_FOUND' => 'No student found with this RFID tag.',
-            'STUDENT_INACTIVE' => 'This student account is currently inactive.',
-            'TURNSTILE_INACTIVE' => 'This turnstile device is currently inactive.',
             default => 'An unexpected error occurred.',
         };
     }

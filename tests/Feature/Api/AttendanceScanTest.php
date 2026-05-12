@@ -117,7 +117,7 @@ it('rejects scan from an inactive turnstile', function (): void {
         ->postJson('/api/v1/attendance/scan', ['rfid' => 'TESTRF01']);
 
     $response->assertStatus(403);
-    $response->assertJsonPath('errors.0.code', 'TURNSTILE_INACTIVE');
+    $response->assertJsonPath('errors.0.code', 'USER_INACTIVE');
 });
 
 it('rejects scan for an inactive student', function (): void {
@@ -127,7 +127,7 @@ it('rejects scan for an inactive student', function (): void {
         ->postJson('/api/v1/attendance/scan', ['rfid' => 'TESTRF01']);
 
     $response->assertStatus(403);
-    $response->assertJsonPath('errors.0.code', 'STUDENT_INACTIVE');
+    $response->assertJsonPath('errors.0.code', 'USER_INACTIVE');
 });
 
 it('allows turnstile ping with valid token', function (): void {
