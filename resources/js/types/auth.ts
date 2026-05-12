@@ -1,7 +1,15 @@
 export type User = {
     id: number;
+    student_id: string;
+    rfid: string;
+    first_name: string;
+    middle_name: string | null;
+    last_name: string;
     name: string;
     email: string;
+    guardian_name: string;
+    guardian_contact_number: string;
+    status: boolean;
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;

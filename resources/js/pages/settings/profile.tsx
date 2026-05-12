@@ -28,7 +28,7 @@ export default function Profile({
                 <Heading
                     variant="small"
                     title="Profile information"
-                    description="Update your name and email address"
+                    description="Update your personal and guardian information"
                 />
 
                 <Form
@@ -40,23 +40,96 @@ export default function Profile({
                 >
                     {({ processing, errors }) => (
                         <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="student_id">Student ID</Label>
+                                    <Input
+                                        id="student_id"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.student_id}
+                                        name="student_id"
+                                        required
+                                        placeholder="Enter Student ID"
+                                    />
+                                    <InputError message={errors.student_id} />
+                                </div>
 
-                                <Input
-                                    id="name"
-                                    className="mt-1 block w-full"
-                                    defaultValue={auth.user.name}
-                                    name="name"
-                                    required
-                                    autoComplete="name"
-                                    placeholder="Full name"
-                                />
+                                <div className="grid gap-2">
+                                    <Label htmlFor="rfid">RFID Tag</Label>
+                                    <Input
+                                        id="rfid"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.rfid}
+                                        name="rfid"
+                                        required
+                                        placeholder="Scan or Enter RFID"
+                                    />
+                                    <InputError message={errors.rfid} />
+                                </div>
 
-                                <InputError
-                                    className="mt-2"
-                                    message={errors.name}
-                                />
+                                <div className="grid gap-2">
+                                    <Label htmlFor="first_name">First Name</Label>
+                                    <Input
+                                        id="first_name"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.first_name}
+                                        name="first_name"
+                                        required
+                                        placeholder="First Name"
+                                    />
+                                    <InputError message={errors.first_name} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="middle_name">Middle Name</Label>
+                                    <Input
+                                        id="middle_name"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.middle_name || ''}
+                                        name="middle_name"
+                                        placeholder="Middle Name (Optional)"
+                                    />
+                                    <InputError message={errors.middle_name} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="last_name">Last Name</Label>
+                                    <Input
+                                        id="last_name"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.last_name}
+                                        name="last_name"
+                                        required
+                                        placeholder="Last Name"
+                                    />
+                                    <InputError message={errors.last_name} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="guardian_name">Guardian Name</Label>
+                                    <Input
+                                        id="guardian_name"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.guardian_name}
+                                        name="guardian_name"
+                                        required
+                                        placeholder="Guardian Name"
+                                    />
+                                    <InputError message={errors.guardian_name} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="guardian_contact_number">Guardian Contact #</Label>
+                                    <Input
+                                        id="guardian_contact_number"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.guardian_contact_number}
+                                        name="guardian_contact_number"
+                                        required
+                                        placeholder="Contact Number"
+                                    />
+                                    <InputError message={errors.guardian_contact_number} />
+                                </div>
                             </div>
 
                             <div className="grid gap-2">
