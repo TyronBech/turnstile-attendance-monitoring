@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendAttendanceSmsJob;
 use App\Models\AttendanceLog;
 use App\Models\Turnstile;
 use App\Models\User;
@@ -12,6 +13,7 @@ class AttendanceService
 {
     /**
      * Process an RFID scan and record the attendance log.
+     *
      * @throws \Exception
      */
     public function recordScan(Turnstile $turnstile, string $rfid): AttendanceLog
@@ -29,14 +31,35 @@ class AttendanceService
 
             $action = $this->determineNextAction($student->id);
 
-            return AttendanceLog::create([
+            $log = AttendanceLog::create([
                 'user_id' => $student->id,
                 'turnstile_id' => $turnstile->id,
                 'action' => $action,
                 'scanned_at' => Carbon::now(),
                 'sms_status' => 'PENDING',
             ]);
+
+            if ($this->shouldQueueGuardianSms($student)) {
+                SendAttendanceSmsJob::dispatch($log->id)
+                    ->afterCommit()
+                    ->afterResponse();
+            }
+
+            return $log;
         });
+    }
+
+    private function shouldQueueGuardianSms(User $student): bool
+    {
+        if (! config('services.semaphore.enabled')) {
+            return false;
+        }
+
+        if (! filled((string) config('services.semaphore.api_key'))) {
+            return false;
+        }
+
+        return filled($student->guardian_contact_number);
     }
 
     /**
