@@ -50,7 +50,7 @@ class SemaphoreSmsService
 
             $responseData = $response->json();
 
-            if ($response->successful() && isset($responseData[0]['status']) && (string) $responseData[0]['status'] === '1') {
+            if ($response->successful() && is_array($responseData) && isset($responseData[0]['status']) && (string) $responseData[0]['status'] === '1') {
                 Log::info("SMS sent successfully to {$toNumber}", [
                     'response' => $responseData,
                 ]);
@@ -58,12 +58,10 @@ class SemaphoreSmsService
                 return true;
             }
 
-            $errorMsg = is_array($responseData) && isset($responseData[0]['message'])
-                ? (string) $responseData[0]['message']
-                : 'Unknown error';
-            Log::error("Failed to send SMS to {$toNumber}: {$errorMsg}", [
-                'response' => $responseData,
-            ]);
+            $rawBody = $response->body();
+            $status = $response->status();
+            
+            Log::error("Semaphore rejected SMS to {$toNumber}. HTTP Status: {$status}. Raw Body: {$rawBody}");
 
             return false;
         } catch (\Throwable $e) {
