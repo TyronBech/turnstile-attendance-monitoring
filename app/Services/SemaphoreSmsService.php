@@ -40,11 +40,8 @@ class SemaphoreSmsService
                 'apikey' => $this->apiKey,
                 'number' => $toNumber,
                 'message' => $message,
+                'sendername' => $this->senderName !== '' ? $this->senderName : 'SEMAPHORE',
             ];
-
-            if ($this->senderName !== '') {
-                $payload['sendername'] = $this->senderName;
-            }
 
             $response = Http::timeout(15)->asForm()->post($this->apiUrl, $payload);
 
