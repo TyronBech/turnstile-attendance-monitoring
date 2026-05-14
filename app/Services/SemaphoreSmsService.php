@@ -35,15 +35,21 @@ class SemaphoreSmsService
 
         $toNumber = $this->convertToSemaphoreFormat($toNumber);
 
-        try {
-            $payload = [
-                'apikey' => $this->apiKey,
-                'number' => $toNumber,
-                'message' => $message,
-                'sendername' => $this->senderName !== '' ? $this->senderName : 'SEMAPHORE',
-            ];
+        // ALWAYS force the v4 URL so we don't rely on cached or outdated .env settings
+        $v4Url = 'https://api.semaphore.co/api/v4/messages';
 
-            $response = Http::timeout(15)->asForm()->post($this->apiUrl, $payload);
+        $payload = [
+            'apikey' => $this->apiKey,
+            'number' => $toNumber,
+            'message' => $message,
+        ];
+
+        if ($this->senderName !== '') {
+            $payload['sendername'] = $this->senderName;
+        }
+
+        try {
+            $response = Http::timeout(15)->post($v4Url, $payload);
 
             $responseData = $response->json();
 
