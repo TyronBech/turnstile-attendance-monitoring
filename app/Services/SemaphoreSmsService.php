@@ -36,12 +36,17 @@ class SemaphoreSmsService
         $toNumber = $this->convertToSemaphoreFormat($toNumber);
 
         try {
-            $response = Http::timeout(15)->post($this->apiUrl, [
+            $payload = [
                 'apikey' => $this->apiKey,
                 'number' => $toNumber,
                 'message' => $message,
-                'sendername' => $this->senderName,
-            ]);
+            ];
+
+            if ($this->senderName !== '') {
+                $payload['sendername'] = $this->senderName;
+            }
+
+            $response = Http::timeout(15)->post($this->apiUrl, $payload);
 
             $responseData = $response->json();
 
