@@ -64,4 +64,14 @@ class UserFactory extends Factory
             'two_factor_confirmed_at' => now(),
         ]);
     }
+
+    /**
+     * No guardian phone — SNCS will not queue Semaphore SMS for this user.
+     */
+    public function withoutGuardianSms(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'guardian_contact_number' => '',
+        ]);
+    }
 }
