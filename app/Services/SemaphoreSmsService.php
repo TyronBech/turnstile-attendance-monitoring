@@ -11,7 +11,8 @@ class SemaphoreSmsService
         protected string $apiKey,
         protected string $senderName,
         protected string $apiUrl,
-    ) {}
+    ) {
+    }
 
     public static function fromConfig(): self
     {
@@ -35,8 +36,8 @@ class SemaphoreSmsService
 
         $toNumber = $this->convertToSemaphoreFormat($toNumber);
 
-        // ALWAYS force the v4 URL so we don't rely on cached or outdated .env settings
-        $v4Url = 'https://api.semaphore.co/api/v4/messages';
+        // ALWAYS force the v1 URL so we don't rely on cached or outdated .env settings
+        $v1Url = 'https://api.semaphore.co/api/v1/messages';
 
         $payload = [
             'apikey' => $this->apiKey,
@@ -49,7 +50,7 @@ class SemaphoreSmsService
         }
 
         try {
-            $response = Http::timeout(15)->post($v4Url, $payload);
+            $response = Http::timeout(15)->post($v1Url, $payload);
 
             $responseData = $response->json();
 
@@ -63,7 +64,7 @@ class SemaphoreSmsService
 
             $rawBody = $response->body();
             $status = $response->status();
-            
+
             Log::error("Semaphore rejected SMS to {$toNumber}. HTTP Status: {$status}. Raw Body: {$rawBody}");
 
             return false;
@@ -86,15 +87,15 @@ class SemaphoreSmsService
         }
 
         if (str_starts_with($cleaned, '0')) {
-            return '63'.substr($cleaned, 1);
+            return '63' . substr($cleaned, 1);
         }
 
         if (strlen($cleaned) === 10 && str_starts_with($cleaned, '9')) {
-            return '63'.$cleaned;
+            return '63' . $cleaned;
         }
 
         if (str_starts_with($cleaned, '9')) {
-            return '63'.substr($cleaned, 1);
+            return '63' . substr($cleaned, 1);
         }
 
         return $cleaned;
