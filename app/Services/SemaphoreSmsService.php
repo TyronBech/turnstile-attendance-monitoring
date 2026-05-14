@@ -46,7 +46,7 @@ class SemaphoreSmsService
                 $payload['sendername'] = $this->senderName;
             }
 
-            $response = Http::timeout(15)->post($this->apiUrl, $payload);
+            $response = Http::timeout(15)->asForm()->post($this->apiUrl, $payload);
 
             $responseData = $response->json();
 
