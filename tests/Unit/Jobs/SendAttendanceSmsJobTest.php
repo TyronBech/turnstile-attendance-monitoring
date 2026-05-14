@@ -14,14 +14,14 @@ uses(TestCase::class, RefreshDatabase::class);
 beforeEach(function (): void {
     config([
         'services.semaphore.api_key' => 'test-api-key',
-        'services.semaphore.api_url' => 'https://api.semaphore.test/messages',
+        'services.semaphore.api_url' => 'https://api.semaphore.co/api/v1/messages',
         'services.semaphore.sender_name' => 'SNCS',
     ]);
 });
 
 it('sends sms and marks attendance log as sent when semaphore succeeds', function (): void {
     Http::fake([
-        'https://api.semaphore.test/messages' => Http::response([['status' => '1']], 200),
+        'https://api.semaphore.co/api/v1/messages' => Http::response([['status' => '1']], 200),
     ]);
 
     $user = User::factory()->create([
@@ -45,7 +45,7 @@ it('sends sms and marks attendance log as sent when semaphore succeeds', functio
 
 it('throws when semaphore rejects so the queue can retry', function (): void {
     Http::fake([
-        'https://api.semaphore.test/messages' => Http::response([['status' => '0', 'message' => 'bad']], 200),
+        'https://api.semaphore.co/api/v1/messages' => Http::response([['status' => '0', 'message' => 'bad']], 200),
     ]);
 
     $user = User::factory()->create([
@@ -87,7 +87,7 @@ it('marks log as failed when failed callback runs', function (): void {
 
 it('does nothing when log is already sent', function (): void {
     Http::fake([
-        'https://api.semaphore.test/messages' => Http::response([['status' => '1']], 200),
+        'https://api.semaphore.co/api/v1/messages' => Http::response([['status' => '1']], 200),
     ]);
 
     $user = User::factory()->create(['guardian_contact_number' => '09171234567']);
