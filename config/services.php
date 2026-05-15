@@ -43,8 +43,8 @@ return [
     'semaphore' => [
         'enabled' => env('SEMAPHORE_ENABLED', false),
         'api_key' => env('SEMAPHORE_API_KEY'),
-        'sender_name' => env('SEMAPHORE_SENDER_NAME', 'SNCS'),
-        'api_url' => env('SEMAPHORE_API_URL', 'https://api.semaphore.co/v1/messages'),
+        'sender_name' => env('SEMAPHORE_SENDER_NAME', ''),
+        'api_url' => env('SEMAPHORE_API_URL', 'https://api.semaphore.co/api/v4/messages'),
     ],
 
 ];

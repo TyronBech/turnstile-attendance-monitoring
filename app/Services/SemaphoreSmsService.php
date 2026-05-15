@@ -11,7 +11,8 @@ class SemaphoreSmsService
         protected string $apiKey,
         protected string $senderName,
         protected string $apiUrl,
-    ) {}
+    ) {
+    }
 
     public static function fromConfig(): self
     {
@@ -35,17 +36,25 @@ class SemaphoreSmsService
 
         $toNumber = $this->convertToSemaphoreFormat($toNumber);
 
+        // ALWAYS force the v1 URL so we don't rely on cached or outdated .env settings
+        $v1Url = 'https://api.semaphore.co/api/v1/messages';
+
+        $payload = [
+            'apikey' => $this->apiKey,
+            'number' => $toNumber,
+            'message' => $message,
+        ];
+
+        if ($this->senderName !== '') {
+            $payload['sendername'] = $this->senderName;
+        }
+
         try {
-            $response = Http::timeout(15)->post($this->apiUrl, [
-                'apikey' => $this->apiKey,
-                'number' => $toNumber,
-                'message' => $message,
-                'sendername' => $this->senderName,
-            ]);
+            $response = Http::timeout(15)->post($v1Url, $payload);
 
             $responseData = $response->json();
 
-            if ($response->successful() && isset($responseData[0]['status']) && (string) $responseData[0]['status'] === '1') {
+            if ($response->successful() && is_array($responseData) && isset($responseData[0]['status']) && (string) $responseData[0]['status'] === '1') {
                 Log::info("SMS sent successfully to {$toNumber}", [
                     'response' => $responseData,
                 ]);
@@ -53,12 +62,10 @@ class SemaphoreSmsService
                 return true;
             }
 
-            $errorMsg = is_array($responseData) && isset($responseData[0]['message'])
-                ? (string) $responseData[0]['message']
-                : 'Unknown error';
-            Log::error("Failed to send SMS to {$toNumber}: {$errorMsg}", [
-                'response' => $responseData,
-            ]);
+            $rawBody = $response->body();
+            $status = $response->status();
+
+            Log::error("Semaphore rejected SMS to {$toNumber}. HTTP Status: {$status}. Raw Body: {$rawBody}");
 
             return false;
         } catch (\Throwable $e) {
@@ -80,15 +87,15 @@ class SemaphoreSmsService
         }
 
         if (str_starts_with($cleaned, '0')) {
-            return '63'.substr($cleaned, 1);
+            return '63' . substr($cleaned, 1);
         }
 
         if (strlen($cleaned) === 10 && str_starts_with($cleaned, '9')) {
-            return '63'.$cleaned;
+            return '63' . $cleaned;
         }
 
         if (str_starts_with($cleaned, '9')) {
-            return '63'.substr($cleaned, 1);
+            return '63' . substr($cleaned, 1);
         }
 
         return $cleaned;
