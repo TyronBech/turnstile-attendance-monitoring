@@ -33,7 +33,7 @@ class SendAttendanceSmsJob implements ShouldQueue
     public function handle(SemaphoreSmsService $sms): void
     {
         $log = AttendanceLog::query()
-            ->with(['user', 'turnstile'])
+            ->with(['user.studentDetail', 'turnstile'])
             ->find($this->attendanceLogId);
 
         if ($log === null) {
@@ -45,7 +45,7 @@ class SendAttendanceSmsJob implements ShouldQueue
         }
 
         $user = $log->user;
-        $guardianNumber = $user->guardian_contact_number ?? '';
+        $guardianNumber = $user->studentDetail?->guardian_contact_number ?? '';
 
         if ($guardianNumber === '') {
             return;

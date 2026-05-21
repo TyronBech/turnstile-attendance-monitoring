@@ -14,8 +14,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Seed the admin/test user
-        User::factory()->create([
-            'student_id' => '0000000000',
+        User::factory()->withoutStudentProfile()->create([
             'rfid' => '0000000000',
             'first_name' => 'Test',
             'last_name' => 'User',

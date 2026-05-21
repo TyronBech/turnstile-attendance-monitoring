@@ -19,7 +19,11 @@ class AttendanceService
     public function recordScan(Turnstile $turnstile, string $rfid): AttendanceLog
     {
         return DB::transaction(function () use ($turnstile, $rfid) {
-            $student = User::where('rfid', $rfid)->first();
+            $student = User::query()
+                ->with('studentDetail')
+                ->where('rfid', $rfid)
+                ->whereHas('studentDetail')
+                ->first();
 
             if (! $student) {
                 throw new \Exception('RFID_NOT_FOUND', 404);
@@ -59,7 +63,7 @@ class AttendanceService
             return false;
         }
 
-        return filled($student->guardian_contact_number);
+        return filled($student->studentDetail?->guardian_contact_number);
     }
 
     /**

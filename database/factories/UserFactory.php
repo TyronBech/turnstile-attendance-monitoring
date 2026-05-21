@@ -74,4 +74,16 @@ class UserFactory extends Factory
             'guardian_contact_number' => '',
         ]);
     }
+
+    /**
+     * Do not create a student profile payload for this user.
+     */
+    public function withoutStudentProfile(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'student_id' => null,
+            'guardian_name' => null,
+            'guardian_contact_number' => null,
+        ]);
+    }
 }

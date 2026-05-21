@@ -13,6 +13,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function (): void {
     config([
+        'logging.default' => 'null',
         'services.semaphore.api_key' => 'test-api-key',
         'services.semaphore.api_url' => 'https://api.semaphore.co/api/v1/messages',
         'services.semaphore.sender_name' => 'SNCS',

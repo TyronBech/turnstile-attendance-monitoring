@@ -23,6 +23,8 @@ class StudentSeeder extends Seeder
                 'middle_name' => 'Santos',
                 'last_name' => 'Dela Cruz',
                 'email' => 'juan.delacruz@university.edu',
+                'level' => 'Grade 11',
+                'section' => 'STEM A',
                 'guardian_name' => 'Maria Dela Cruz',
                 'guardian_contact_number' => '09171234567',
                 'password' => 'password',
@@ -35,6 +37,8 @@ class StudentSeeder extends Seeder
                 'middle_name' => 'Reyes',
                 'last_name' => 'Garcia',
                 'email' => 'maria.garcia@university.edu',
+                'level' => 'Grade 12',
+                'section' => 'ABM 1',
                 'guardian_name' => 'Jose Garcia',
                 'guardian_contact_number' => '09181234567',
                 'password' => 'password',
@@ -47,6 +51,8 @@ class StudentSeeder extends Seeder
                 'middle_name' => 'Lopez',
                 'last_name' => 'Bautista',
                 'email' => 'pedro.bautista@university.edu',
+                'level' => 'Grade 10',
+                'section' => 'Section 2',
                 'guardian_name' => 'Ana Bautista',
                 'guardian_contact_number' => '09191234567',
                 'password' => 'password',
@@ -55,9 +61,29 @@ class StudentSeeder extends Seeder
         ];
 
         foreach ($students as $student) {
-            User::firstOrCreate(
-                ['student_id' => $student['student_id']],
-                $student,
+            $user = User::updateOrCreate(
+                ['email' => $student['email']],
+                [
+                    'rfid' => $student['rfid'],
+                    'first_name' => $student['first_name'],
+                    'middle_name' => $student['middle_name'],
+                    'last_name' => $student['last_name'],
+                    'email' => $student['email'],
+                    'password' => $student['password'],
+                    'status' => $student['status'],
+                ],
+            );
+
+            $user->studentDetail()->updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'id_number' => $student['student_id'],
+                    'level' => $student['level'],
+                    'section' => $student['section'],
+                    'guardian_name' => $student['guardian_name'],
+                    'guardian_contact_number' => $student['guardian_contact_number'],
+                    'active_id_number' => $student['student_id'],
+                ],
             );
         }
 
