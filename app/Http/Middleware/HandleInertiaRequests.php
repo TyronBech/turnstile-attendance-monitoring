@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\UiSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -36,6 +37,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $request->user()?->loadMissing('studentDetail');
+        $uiSettings = once(static fn (): array => UiSetting::frontendTheme());
 
         return [
             ...parent::share($request),
@@ -43,6 +45,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'uiSettings' => $uiSettings,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

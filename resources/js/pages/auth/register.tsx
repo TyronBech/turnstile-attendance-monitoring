@@ -3,6 +3,7 @@ import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -10,6 +11,8 @@ import { login } from '@/routes';
 import { store } from '@/routes/register';
 
 export default function Register() {
+    const { palette, rgb } = useUiTheme();
+
     return (
         <>
             <Head title="Register" />
@@ -157,7 +160,11 @@ export default function Register() {
 
                         <Button
                             type="submit"
-                            className="mt-2 w-full"
+                            className="mt-2 w-full border-0 text-white"
+                            style={{
+                                backgroundColor: rgb(palette.primary['500']),
+                                boxShadow: `0 18px 32px ${rgb(palette.primary['700'], 0.22)}`,
+                            }}
                             tabIndex={11}
                             data-test="register-user-button"
                         >
@@ -167,7 +174,13 @@ export default function Register() {
 
                         <div className="text-center text-sm text-muted-foreground">
                             Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={12}>
+                            <TextLink
+                                href={login()}
+                                tabIndex={12}
+                                style={{
+                                    color: rgb(palette.primary['700']),
+                                }}
+                            >
                                 Log in
                             </TextLink>
                         </div>

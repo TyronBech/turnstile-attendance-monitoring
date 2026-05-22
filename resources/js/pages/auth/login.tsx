@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
@@ -22,6 +23,8 @@ export default function Login({
     canResetPassword,
     canRegister,
 }: Props) {
+    const { palette, rgb } = useUiTheme();
+
     return (
         <>
             <Head title="Log in" />
@@ -56,6 +59,9 @@ export default function Login({
                                         <TextLink
                                             href={request()}
                                             className="ml-auto text-sm"
+                                            style={{
+                                                color: rgb(palette.primary['700']),
+                                            }}
                                             tabIndex={5}
                                         >
                                             Forgot password?
@@ -84,7 +90,11 @@ export default function Login({
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="mt-4 w-full border-0 text-white"
+                                style={{
+                                    backgroundColor: rgb(palette.primary['500']),
+                                    boxShadow: `0 18px 32px ${rgb(palette.primary['700'], 0.22)}`,
+                                }}
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
@@ -97,7 +107,13 @@ export default function Login({
                         {canRegister && (
                             <div className="text-center text-sm text-muted-foreground">
                                 Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
+                                <TextLink
+                                    href={register()}
+                                    tabIndex={5}
+                                    style={{
+                                        color: rgb(palette.primary['700']),
+                                    }}
+                                >
                                     Sign up
                                 </TextLink>
                             </div>
@@ -107,7 +123,14 @@ export default function Login({
             </Form>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                <div
+                    className="mb-4 rounded-2xl border px-4 py-3 text-center text-sm font-medium"
+                    style={{
+                        color: rgb(palette.primary['700']),
+                        backgroundColor: rgb(palette.secondary['50']),
+                        borderColor: rgb(palette.primary['200']),
+                    }}
+                >
                     {status}
                 </div>
             )}
