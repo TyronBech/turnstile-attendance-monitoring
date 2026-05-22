@@ -3,11 +3,7 @@ import AppLogoIcon from '@/components/app-logo-icon';
 import { useUiTheme } from '@/hooks/use-ui-theme';
 import { dashboard, login } from '@/routes';
 
-export default function Welcome({
-    canRegister = false,
-}: {
-    canRegister?: boolean;
-}) {
+export default function Welcome() {
     const { auth } = usePage().props as {
         auth: { user?: { name?: string } | null };
     };
