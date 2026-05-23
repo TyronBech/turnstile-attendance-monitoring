@@ -40,8 +40,10 @@ class DispatchPendingAttendanceSmsCommand extends Command
         AttendanceLog::query()
             ->where('sms_status', 'PENDING')
             ->whereHas('user', function ($q): void {
-                $q->whereNotNull('guardian_contact_number')
-                    ->where('guardian_contact_number', '!=', '');
+                $q->whereHas('studentDetail', function ($studentDetailQuery): void {
+                    $studentDetailQuery->whereNotNull('guardian_contact_number')
+                        ->where('guardian_contact_number', '!=', '');
+                });
             })
             ->orderBy('id')
             ->chunkById($chunk, function ($logs) use (&$dispatched): void {

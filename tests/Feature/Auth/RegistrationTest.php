@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\StudentDetail;
 use Laravel\Fortify\Features;
 
 beforeEach(function () {
@@ -27,4 +28,15 @@ test('new users can register', function () {
 
     $this->assertAuthenticated();
     $response->assertRedirect(route('dashboard', absolute: false));
+
+    $user = auth()->user();
+
+    expect($user->student_id)->toBe('1234567890');
+
+    $this->assertDatabaseHas((new StudentDetail)->getTable(), [
+        'user_id' => $user->id,
+        'id_number' => '1234567890',
+        'guardian_name' => 'Jane Doe',
+        'guardian_contact_number' => '09123456789',
+    ]);
 });
