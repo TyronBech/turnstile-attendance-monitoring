@@ -82,4 +82,28 @@ class AttendanceService
 
         return $lastLog->action === 'IN' ? 'OUT' : 'IN';
     }
+
+    /**
+     * Process an array of RFID scans, returning logs of successful scans.
+     * Skips invalid RFIDs so the batch can still be completed.
+     *
+     * @param array<string> $rfids
+     * @return \Illuminate\Support\Collection<int, AttendanceLog>
+     */
+    public function processBatchScans(Turnstile $turnstile, array $rfids)
+    {
+        $logs = collect();
+
+        foreach ($rfids as $rfid) {
+            try {
+                $log = $this->recordScan($turnstile, $rfid);
+                $logs->push($log);
+            } catch (\Exception $e) {
+                // Ignore failure for individual scans during batch so others can sync
+                continue;
+            }
+        }
+
+        return $logs;
+    }
 }

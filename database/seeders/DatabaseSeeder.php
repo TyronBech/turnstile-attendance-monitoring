@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
         // Seed roles, people, and turnstile device with Sanctum token.
         $this->call([
             RolesAndPermissionsSeeder::class,
+            TestUserSeeder::class,
             StudentSeeder::class,
             EmployeeSeeder::class,
             TurnstileSeeder::class,
