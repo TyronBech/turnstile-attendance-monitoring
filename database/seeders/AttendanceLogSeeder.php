@@ -22,13 +22,13 @@ class AttendanceLogSeeder extends Seeder
         }
 
         $student = User::query()
+            ->where('email', 'tyron.bechayda@university.edu')
             ->whereHas('studentDetail')
-            ->orderBy('id')
             ->first();
 
         $employee = User::query()
+            ->where('email', 'jhoncarl.ormita@university.edu')
             ->whereHas('employeeDetail')
-            ->orderBy('id')
             ->first();
 
         if ($student === null || $employee === null) {
