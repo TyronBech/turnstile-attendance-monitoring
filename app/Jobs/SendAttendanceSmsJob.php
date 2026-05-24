@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\AttendanceLog;
 use App\Services\SemaphoreSmsService;
+use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,6 +18,8 @@ class SendAttendanceSmsJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
+    private const DELAY_NOTICE_THRESHOLD_MINUTES = 5;
 
     public int $tries = 3;
 
@@ -52,17 +55,23 @@ class SendAttendanceSmsJob implements ShouldQueue
         }
 
         $studentName = trim($user->name);
+
         if ($studentName === '') {
             $studentName = 'Student';
         }
 
-        $turnstileName = $log->turnstile?->name ?? 'Gate';
-        $timeLabel = $log->scanned_at instanceof Carbon
+        $timeLabel = $log->scanned_at instanceof CarbonInterface
             ? $log->scanned_at->timezone(config('app.timezone'))->format('g:i A')
             : now()->format('g:i A');
 
-        $actionLabel = $log->action === 'IN' ? 'Time In' : 'Time Out';
-        $message = "[SNCS] {$studentName} — {$actionLabel} at {$turnstileName} ({$timeLabel}).";
+        $schoolName = (string) config('services.semaphore.sender_name', 'School');
+        $message = $log->action === 'IN'
+            ? "[{$schoolName}]: Your child, {$studentName}, has arrived at school at {$timeLabel}. Thank you!"
+            : "[{$schoolName}]: Your child, {$studentName}, has left school at {$timeLabel}. Thank You!";
+
+        if ($this->shouldIncludeDelayNotice($log->scanned_at)) {
+            $message .= ' Apologies if this message was delayed.';
+        }
 
         $ok = $sms->send($guardianNumber, $message);
 
@@ -79,5 +88,18 @@ class SendAttendanceSmsJob implements ShouldQueue
             ->where('id', $this->attendanceLogId)
             ->where('sms_status', 'PENDING')
             ->update(['sms_status' => 'FAILED']);
+    }
+
+    private function shouldIncludeDelayNotice(?CarbonInterface $scannedAt): bool
+    {
+        if ($this->attempts() > 1) {
+            return true;
+        }
+
+        if ($scannedAt === null) {
+            return false;
+        }
+
+        return $scannedAt->lt(now()->subMinutes(self::DELAY_NOTICE_THRESHOLD_MINUTES));
     }
 }

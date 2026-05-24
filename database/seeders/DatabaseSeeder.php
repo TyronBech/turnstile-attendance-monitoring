@@ -14,18 +14,30 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Seed the admin/test user
-        User::factory()->withoutStudentProfile()->create([
-            'rfid' => '0000000000',
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test@example.com',
-        ]);
+        $testUser = User::query()->updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'rfid' => '0000000000',
+                'first_name' => 'Test',
+                'middle_name' => null,
+                'last_name' => 'User',
+                'profile_image' => null,
+                'password' => 'password',
+                'status' => true,
+            ],
+        );
 
-        // Seed sample students and turnstile device with Sanctum token
+        $testUser->studentDetail()->delete();
+        $testUser->employeeDetail()->delete();
+
+        // Seed roles, people, and turnstile device with Sanctum token.
         $this->call([
+            RolesAndPermissionsSeeder::class,
             TestUserSeeder::class,
             StudentSeeder::class,
+            EmployeeSeeder::class,
             TurnstileSeeder::class,
+            AttendanceLogSeeder::class,
         ]);
     }
 }

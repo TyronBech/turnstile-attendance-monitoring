@@ -45,6 +45,7 @@ class User extends Authenticatable
         'middle_name',
         'last_name',
         'email',
+        'profile_image',
         'guardian_name',
         'guardian_contact_number',
         'password',
@@ -90,7 +91,11 @@ class User extends Authenticatable
      */
     public function getNameAttribute(): string
     {
-        return trim("{$this->first_name} {$this->middle_name} {$this->last_name}");
+        return trim(implode(' ', array_filter([
+            $this->first_name,
+            $this->getMiddleInitial(),
+            $this->last_name,
+        ])));
     }
 
     /**
@@ -173,6 +178,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the employee detail record associated with this user.
+     */
+    public function employeeDetail(): HasOne
+    {
+        return $this->hasOne(EmployeeDetail::class);
+    }
+
+    /**
      * Persist any virtual student-only attributes to usr_student_details.
      */
     protected function syncPendingStudentDetailAttributes(): void
@@ -204,5 +217,25 @@ class User extends Authenticatable
 
         $this->setRelation('studentDetail', $studentDetail);
         $this->pendingStudentDetailAttributes = [];
+    }
+
+    /**
+     * Get the first-character initial from the first middle-name word.
+     */
+    private function getMiddleInitial(): string
+    {
+        $middleName = trim((string) $this->middle_name);
+
+        if ($middleName === '') {
+            return '';
+        }
+
+        $firstMiddleWord = preg_split('/\s+/', $middleName)[0] ?? '';
+
+        if ($firstMiddleWord === '') {
+            return '';
+        }
+
+        return mb_strtoupper(mb_substr($firstMiddleWord, 0, 1)).'.';
     }
 }

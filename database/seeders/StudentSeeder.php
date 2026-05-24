@@ -8,49 +8,34 @@ use Illuminate\Database\Seeder;
 class StudentSeeder extends Seeder
 {
     /**
-     * Seed 3 sample students with known RFID tags for Postman testing.
-     *
-     * These RFID values simulate what the ESP32's MFRC522 reader
-     * would send — typically hex strings like "A1B2C3D4".
+     * Seed sample students for attendance display and RFID testing.
      */
     public function run(): void
     {
         $students = [
             [
-                'student_id' => '2024-00001',
-                'rfid' => 'A1B2C3D4',
-                'first_name' => 'Juan',
-                'middle_name' => 'Santos',
-                'last_name' => 'Dela Cruz',
-                'email' => 'juan.delacruz@university.edu',
-                'level' => 'Grade 11',
-                'section' => 'STEM A',
-                'guardian_name' => 'Maria Dela Cruz',
-                'guardian_contact_number' => '09171234567',
-                'password' => 'password',
-                'status' => true,
-            ],
-            [
-                'student_id' => '2024-00002',
+                'student_id' => '2026-00002',
                 'rfid' => 'E5F6A7B8',
-                'first_name' => 'Maria',
-                'middle_name' => 'Reyes',
-                'last_name' => 'Garcia',
-                'email' => 'maria.garcia@university.edu',
+                'first_name' => 'Tyron',
+                'middle_name' => 'Panti',
+                'last_name' => 'Bechayda',
+                'email' => 'tyron.bechayda@university.edu',
+                'profile_image' => 'profile-images/tyron.jpg',
                 'level' => 'Grade 12',
                 'section' => 'ABM 1',
-                'guardian_name' => 'Jose Garcia',
+                'guardian_name' => 'Ana Bechayda',
                 'guardian_contact_number' => '09181234567',
                 'password' => 'password',
                 'status' => true,
             ],
             [
-                'student_id' => '2024-00003',
+                'student_id' => '2026-00003',
                 'rfid' => 'C9D0E1F2',
                 'first_name' => 'Pedro',
                 'middle_name' => 'Lopez',
                 'last_name' => 'Bautista',
                 'email' => 'pedro.bautista@university.edu',
+                'profile_image' => null,
                 'level' => 'Grade 10',
                 'section' => 'Section 2',
                 'guardian_name' => 'Ana Bautista',
@@ -61,7 +46,7 @@ class StudentSeeder extends Seeder
         ];
 
         foreach ($students as $student) {
-            $user = User::updateOrCreate(
+            $user = User::query()->updateOrCreate(
                 ['email' => $student['email']],
                 [
                     'rfid' => $student['rfid'],
@@ -69,11 +54,13 @@ class StudentSeeder extends Seeder
                     'middle_name' => $student['middle_name'],
                     'last_name' => $student['last_name'],
                     'email' => $student['email'],
+                    'profile_image' => $student['profile_image'],
                     'password' => $student['password'],
                     'status' => $student['status'],
                 ],
             );
 
+            $user->employeeDetail()->delete();
             $user->studentDetail()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -86,17 +73,5 @@ class StudentSeeder extends Seeder
                 ],
             );
         }
-
-        $this->command->info('');
-        $this->command->info('╔══════════════════════════════════════════════════════════════╗');
-        $this->command->info('║                   SAMPLE STUDENTS SEEDED                    ║');
-        $this->command->info('╠══════════════════════════════════════════════════════════════╣');
-        $this->command->info('║  Student ID    │ RFID       │ Name                          ║');
-        $this->command->info('║  ─────────────────────────────────────────────────────────── ║');
-        $this->command->info('║  2024-00001    │ A1B2C3D4   │ Juan Santos Dela Cruz          ║');
-        $this->command->info('║  2024-00002    │ E5F6A7B8   │ Maria Reyes Garcia             ║');
-        $this->command->info('║  2024-00003    │ C9D0E1F2   │ Pedro Lopez Bautista           ║');
-        $this->command->info('╚══════════════════════════════════════════════════════════════╝');
-        $this->command->info('');
     }
 }

@@ -21,7 +21,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Sync Permissions
         $enumPermissions = array_map(fn ($p) => $p->value, PermissionEnum::cases());
-        
+
         if (empty($enumPermissions)) {
             Permission::query()->delete();
         } else {
@@ -34,7 +34,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Sync Roles
         $enumRoles = array_map(fn ($r) => $r->value, RoleEnum::cases());
-        
+
         if (empty($enumRoles)) {
             Role::query()->delete();
         } else {
@@ -64,6 +64,11 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Security Guard
         $roles[RoleEnum::SecurityGuard->value]->syncPermissions(collect([
+            PermissionEnum::ViewMonitoring,
+        ])->map(fn ($p) => $p->value)->toArray());
+
+        // Live Monitoring
+        $roles[RoleEnum::Live_Monitoring->value]->syncPermissions(collect([
             PermissionEnum::ViewMonitoring,
         ])->map(fn ($p) => $p->value)->toArray());
     }

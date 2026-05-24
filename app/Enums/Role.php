@@ -7,4 +7,5 @@ enum Role: string
     case SuperAdmin = 'super_admin';
     case Admin = 'admin';
     case SecurityGuard = 'security_guard';
+    case Live_Monitoring = 'live_monitoring';
 }
