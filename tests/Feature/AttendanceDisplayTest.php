@@ -5,6 +5,7 @@ use App\Models\Turnstile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -37,6 +38,7 @@ test('attendance display page shows recent tap panels to authenticated users', f
     ]);
 
     $this->actingAs($student);
+    $profileImageUrl = Storage::disk('public')->url('profile-images/william.png');
 
     $this->get(route('attendance-display'))
         ->assertOk()
@@ -44,7 +46,7 @@ test('attendance display page shows recent tap panels to authenticated users', f
             ->component('attendance-display')
             ->has('panels', 4)
             ->where('panels.0.name', 'William M. Quitiquit')
-            ->where('panels.0.profileImage', 'http://turnstile-attendance-monitoring.test/storage/profile-images/william.png')
+            ->where('panels.0.profileImage', $profileImageUrl)
             ->where('panels.0.state', 'active')
             ->where('panels.0.role', 'Student')
             ->where('panels.0.gradeSection', 'Grade 12 | Mercy')
@@ -77,12 +79,13 @@ test('attendance display is rendered from attendance logs without a dedicated fe
     ]);
 
     $this->actingAs($employee);
+    $profileImageUrl = Storage::disk('public')->url('profile-images/maria.png');
 
     $this->get(route('attendance-display'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->has('panels', 4)
-            ->where('panels.0.profileImage', 'http://turnstile-attendance-monitoring.test/storage/profile-images/maria.png')
+            ->where('panels.0.profileImage', $profileImageUrl)
             ->where('panels.0.state', 'idle')
             ->where('panels.0.actionLabel', 'Time Out')
             ->where('panels.0.role', 'Employee')

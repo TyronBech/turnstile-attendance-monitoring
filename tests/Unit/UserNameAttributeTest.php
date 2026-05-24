@@ -18,7 +18,7 @@ test('user name uses the middle name initial', function (): void {
 test('user name uses the first word when middle name has multiple words', function (): void {
     $user = User::factory()->make([
         'first_name' => 'Jhon Carl',
-        'middle_name' => 'La Tortosa',
+        'middle_name' => 'De Torres',
         'last_name' => 'Ormita',
     ]);
 
