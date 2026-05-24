@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
 
         // Seed sample students and turnstile device with Sanctum token
         $this->call([
+            TestUserSeeder::class,
             StudentSeeder::class,
             TurnstileSeeder::class,
         ]);
