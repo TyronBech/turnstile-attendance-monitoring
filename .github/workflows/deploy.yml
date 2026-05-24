@@ -42,27 +42,11 @@ jobs:
           username: ${{ secrets.HOSTINGER_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
-          source: "."
+          source: "app,bootstrap,config,database,public,resources,routes,artisan,composer.json,composer.lock"
           target: ${{ secrets.HOSTINGER_PATH }}
           rm: false
           strip_components: 0
           overwrite: true
-          exclude: >
-            .env,
-            .git,
-            .github,
-            .vscode,
-            bootstrap/ssr,
-            docs,
-            node_modules,
-            storage/*.key,
-            storage/app,
-            storage/framework/cache/*,
-            storage/framework/sessions/*,
-            storage/framework/testing/*,
-            storage/framework/views/*,
-            storage/logs/*,
-            tests
 
       - name: Run deployment commands
         uses: appleboy/ssh-action@v1.2.0
