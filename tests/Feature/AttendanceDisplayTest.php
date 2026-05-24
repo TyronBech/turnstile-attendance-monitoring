@@ -1,0 +1,93 @@
+<?php
+
+use App\Models\AttendanceLog;
+use App\Models\Turnstile;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
+use Inertia\Testing\AssertableInertia as Assert;
+
+uses(RefreshDatabase::class);
+
+test('guests are redirected to login before viewing attendance display', function (): void {
+    $this->get(route('attendance-display'))->assertRedirect(route('login'));
+});
+
+test('attendance display page shows recent tap panels to authenticated users', function (): void {
+    $this->travelTo(now()->setTime(8, 15, 0));
+
+    $student = User::factory()->create([
+        'first_name' => 'William',
+        'middle_name' => 'Mendoza',
+        'last_name' => 'Quitiquit',
+        'profile_image' => 'profile-images/william.png',
+    ]);
+
+    $student->studentDetail()->update([
+        'level' => 'Grade 12',
+        'section' => 'Mercy',
+    ]);
+
+    $turnstile = Turnstile::factory()->create();
+
+    AttendanceLog::factory()->timeIn()->create([
+        'user_id' => $student->id,
+        'turnstile_id' => $turnstile->id,
+        'scanned_at' => now()->subMinute(),
+    ]);
+
+    $this->actingAs($student);
+
+    $this->get(route('attendance-display'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('attendance-display')
+            ->has('panels', 4)
+            ->where('panels.0.name', 'William M. Quitiquit')
+            ->where('panels.0.profileImage', 'http://turnstile-attendance-monitoring.test/storage/profile-images/william.png')
+            ->where('panels.0.state', 'active')
+            ->where('panels.0.role', 'Student')
+            ->where('panels.0.gradeSection', 'Grade 12 | Mercy')
+            ->where('panels.1.state', 'waiting')
+            ->where('tickerItems.3', 'Thank you for keeping attendance records accurate.')
+        );
+});
+
+test('attendance display is rendered from attendance logs without a dedicated feed endpoint', function (): void {
+    $this->travelTo(now()->setTime(9, 0, 0));
+
+    expect(Schema::hasColumn('usr_users', 'profile_image'))->toBeTrue();
+
+    $employee = User::factory()->withoutStudentProfile()->create([
+        'profile_image' => 'profile-images/maria.png',
+    ]);
+
+    $employee->employeeDetail()->create([
+        'employee_id' => 'EMP-2026-0002',
+        'employee_role' => 'Registrar',
+        'active_employee_id' => 'EMP-2026-0002',
+    ]);
+
+    $turnstile = Turnstile::factory()->create();
+
+    AttendanceLog::factory()->timeOut()->create([
+        'user_id' => $employee->id,
+        'turnstile_id' => $turnstile->id,
+        'scanned_at' => now()->subMinutes(10),
+    ]);
+
+    $this->actingAs($employee);
+
+    $this->get(route('attendance-display'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('panels', 4)
+            ->where('panels.0.profileImage', 'http://turnstile-attendance-monitoring.test/storage/profile-images/maria.png')
+            ->where('panels.0.state', 'idle')
+            ->where('panels.0.actionLabel', 'Time Out')
+            ->where('panels.0.role', 'Employee')
+            ->where('panels.1.state', 'waiting')
+        );
+
+    $this->get('/attendance-display/feed')->assertNotFound();
+});

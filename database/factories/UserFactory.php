@@ -13,6 +13,18 @@ use Illuminate\Support\Str;
 class UserFactory extends Factory
 {
     /**
+     * Available local mock profile images.
+     *
+     * @var array<int, string>
+     */
+    private const PROFILE_IMAGES = [
+        'profile-images/default.svg',
+        'profile-images/juan-dela-cruz.svg',
+        'profile-images/maria-garcia.svg',
+        'profile-images/pedro-bautista.svg',
+    ];
+
+    /**
      * The current password being used by the factory.
      */
     protected static ?string $password;
@@ -31,6 +43,7 @@ class UserFactory extends Factory
             'middle_name' => fake()->lastName(),
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
+            'profile_image' => fake()->randomElement(self::PROFILE_IMAGES),
             'guardian_name' => fake()->name(),
             'guardian_contact_number' => fake()->phoneNumber(),
             'email_verified_at' => now(),
