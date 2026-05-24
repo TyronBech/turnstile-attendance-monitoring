@@ -1,0 +1,81 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Upload application files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USERNAME }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          source: "."
+          target: ${{ secrets.HOSTINGER_PATH }}
+          rm: false
+          strip_components: 0
+          overwrite: true
+          exclude: >
+            .env,
+            .git,
+            .github,
+            .vscode,
+            bootstrap/ssr,
+            docs,
+            node_modules,
+            storage/*.key,
+            storage/app,
+            storage/framework/cache/*,
+            storage/framework/sessions/*,
+            storage/framework/testing/*,
+            storage/framework/views/*,
+            storage/logs/*,
+            tests
+
+      - name: Run deployment commands
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USERNAME }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          script_stop: true
+          script: |
+            cd "${{ secrets.HOSTINGER_PATH }}"
+            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+            php artisan optimize:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache

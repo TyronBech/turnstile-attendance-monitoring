@@ -46,19 +46,22 @@ class StudentSeeder extends Seeder
         ];
 
         foreach ($students as $student) {
-            $user = User::query()->updateOrCreate(
-                ['email' => $student['email']],
-                [
-                    'rfid' => $student['rfid'],
-                    'first_name' => $student['first_name'],
-                    'middle_name' => $student['middle_name'],
-                    'last_name' => $student['last_name'],
-                    'email' => $student['email'],
-                    'profile_image' => $student['profile_image'],
-                    'password' => $student['password'],
-                    'status' => $student['status'],
-                ],
-            );
+            $user = User::query()
+                ->where('email', $student['email'])
+                ->orWhere('rfid', $student['rfid'])
+                ->first() ?? new User;
+
+            $user->fill([
+                'rfid' => $student['rfid'],
+                'first_name' => $student['first_name'],
+                'middle_name' => $student['middle_name'],
+                'last_name' => $student['last_name'],
+                'email' => $student['email'],
+                'profile_image' => $student['profile_image'],
+                'password' => $student['password'],
+                'status' => $student['status'],
+            ]);
+            $user->save();
 
             $user->employeeDetail()->delete();
             $user->studentDetail()->updateOrCreate(
