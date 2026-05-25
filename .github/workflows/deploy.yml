@@ -58,6 +58,11 @@ jobs:
           script_stop: true
           script: |
             cd "${{ secrets.HOSTINGER_PATH }}"
+            mkdir -p storage/framework/cache
+            mkdir -p storage/framework/sessions
+            mkdir -p storage/framework/views
+            mkdir -p storage/logs
+            mkdir -p bootstrap/cache
             composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
             php artisan optimize:clear --except=cache --no-interaction
             php artisan config:cache
