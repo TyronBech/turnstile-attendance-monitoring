@@ -35,6 +35,11 @@ jobs:
       - name: Build assets
         run: npm run build
 
+      - name: Verify build artifacts
+        run: |
+          test -f public/build/manifest.json
+          ls -la public/build
+
       - name: Upload application files
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -42,7 +47,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
-          source: "app,bootstrap,config,database,public,resources,routes,artisan,composer.json,composer.lock"
+          source: "app,bootstrap,config,database,public,public/build,resources,routes,artisan,composer.json,composer.lock"
           target: ${{ secrets.HOSTINGER_PATH }}
           rm: false
           strip_components: 0
@@ -63,6 +68,11 @@ jobs:
             mkdir -p storage/framework/views
             mkdir -p storage/logs
             mkdir -p bootstrap/cache
+            if [ ! -f public/build/manifest.json ]; then
+              echo "Missing public/build/manifest.json after upload."
+              ls -la public || true
+              exit 1
+            fi
             composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
             php artisan optimize:clear --except=cache --no-interaction
             php artisan config:cache
