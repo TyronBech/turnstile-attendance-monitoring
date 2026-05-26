@@ -53,7 +53,7 @@ function PanelBackgroundImage({ imageUrl, name }: PanelBackgroundImageProps) {
         <img
             src={imageUrl}
             alt={name}
-            className="absolute inset-0 h-full w-full object-cover object-[center_18%] opacity-72 grayscale-[0.12]"
+            className="absolute inset-0 h-full w-full object-cover object-[center_18%]"
             onError={() => {
                 setHasImageError(true);
             }}
@@ -154,11 +154,7 @@ export default function AttendanceDisplay({
                                     key={panel.id}
                                     className="attendance-panel relative flex min-h-0 min-w-0 flex-col overflow-hidden border-black/10 px-[clamp(0.65rem,0.95vw,1rem)] py-[clamp(0.85rem,1.2vw,1.25rem)]"
                                     style={{
-                                        backgroundColor: isWaiting
-                                            ? 'rgb(var(--attendance-idle))'
-                                            : isActive
-                                              ? 'rgb(var(--attendance-idle))'
-                                              : 'rgb(var(--attendance-header))',
+                                        backgroundColor: 'rgb(var(--attendance-idle))',
                                     }}
                                 >
                                     {!isWaiting && panel.profileImage ? (
