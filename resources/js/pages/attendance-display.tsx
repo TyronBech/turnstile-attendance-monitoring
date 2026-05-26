@@ -1,6 +1,7 @@
 import { Head, Link, usePoll } from '@inertiajs/react';
 import { LogOut } from 'lucide-react';
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useState  } from 'react';
+import type {CSSProperties} from 'react';
 import { useUiTheme } from '@/hooks/use-ui-theme';
 import { logout } from '@/routes';
 
@@ -147,7 +148,6 @@ export default function AttendanceDisplay({
                     <main className="attendance-panels min-h-0 flex-1 bg-black/25">
                         {panels.map((panel) => {
                             const isWaiting = panel.state === 'waiting';
-                            const isActive = panel.state === 'active';
 
                             return (
                                 <article
