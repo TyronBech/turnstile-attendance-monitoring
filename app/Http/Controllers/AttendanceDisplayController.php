@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceLog;
-use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -11,6 +10,8 @@ use Inertia\Response;
 class AttendanceDisplayController extends Controller
 {
     private const PANEL_LIMIT = 4;
+
+    private const PANEL_DISPLAY_WINDOW_SECONDS = 5;
 
     public function show(): Response
     {
@@ -32,6 +33,7 @@ class AttendanceDisplayController extends Controller
     {
         $panels = AttendanceLog::query()
             ->with(['user.studentDetail', 'user.employeeDetail'])
+            ->where('scanned_at', '>=', now()->subSeconds(self::PANEL_DISPLAY_WINDOW_SECONDS))
             ->latest('scanned_at')
             ->take(self::PANEL_LIMIT)
             ->get()
@@ -43,13 +45,13 @@ class AttendanceDisplayController extends Controller
                 $isStudent = $studentDetail !== null;
                 $isEmployee = $employeeDetail !== null;
                 $name = $user?->name ?? 'Unknown User';
-                $profileImage = $this->resolveProfileImage($user?->profile_image, $name);
+                $profileImage = $this->resolveProfileImage($user?->profile_image);
 
                 return [
                     'id' => $log->id,
                     'slot' => $index + 1,
-                    'state' => $this->isRecentlyTapped($log->scanned_at) ? 'active' : 'idle',
-                    'isRecent' => $this->isRecentlyTapped($log->scanned_at),
+                    'state' => 'active',
+                    'isRecent' => true,
                     'name' => $name,
                     'role' => $isStudent ? 'Student' : ($isEmployee ? 'Employee' : 'Staff'),
                     'gradeSection' => $isStudent
@@ -61,7 +63,7 @@ class AttendanceDisplayController extends Controller
                     'profileImage' => $profileImage,
                     'action' => $log->action,
                     'actionLabel' => $log->action === 'OUT' ? 'Time Out' : 'Time In',
-                    'timeLabel' => $log->scanned_at->format('g:i:s A'),
+                    'timeLabel' => $log->scanned_at->timezone(config('app.timezone'))->format('g:i:s A'),
                 ];
             })
             ->all();
@@ -85,16 +87,7 @@ class AttendanceDisplayController extends Controller
         return $panels;
     }
 
-    private function isRecentlyTapped(?CarbonInterface $scannedAt): bool
-    {
-        if ($scannedAt === null) {
-            return false;
-        }
-
-        return $scannedAt->greaterThanOrEqualTo(now()->subMinutes(2));
-    }
-
-    private function resolveProfileImage(?string $profileImage, string $name): string
+    private function resolveProfileImage(?string $profileImage): ?string
     {
         if (filled($profileImage)) {
             if (
@@ -109,6 +102,6 @@ class AttendanceDisplayController extends Controller
             return Storage::disk('public')->url($profileImage);
         }
 
-        return Storage::disk('public')->url('profile-images/default.svg');
+        return null;
     }
 }

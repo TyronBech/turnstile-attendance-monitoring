@@ -36,7 +36,7 @@ test('attendance display page shows recent tap panels to authenticated users', f
     AttendanceLog::factory()->timeIn()->create([
         'user_id' => $student->id,
         'turnstile_id' => $turnstile->id,
-        'scanned_at' => now()->subMinute(),
+        'scanned_at' => now()->subSeconds(3),
     ]);
 
     $this->actingAs($student);
@@ -52,12 +52,13 @@ test('attendance display page shows recent tap panels to authenticated users', f
             ->where('panels.0.state', 'active')
             ->where('panels.0.role', 'Student')
             ->where('panels.0.gradeSection', 'Grade 12 | Mercy')
+            ->where('panels.0.timeLabel', '8:14:57 AM')
             ->where('panels.1.state', 'waiting')
             ->where('tickerItems.3', 'Thank you for keeping attendance records accurate.')
         );
 });
 
-test('attendance display is rendered from attendance logs without a dedicated feed endpoint', function (): void {
+test('attendance display returns to awaiting panels after five seconds', function (): void {
     $this->travelTo(now()->setTime(9, 0, 0));
 
     expect(Schema::hasColumn('usr_users', 'profile_image'))->toBeTrue();
@@ -77,20 +78,16 @@ test('attendance display is rendered from attendance logs without a dedicated fe
     AttendanceLog::factory()->timeOut()->create([
         'user_id' => $employee->id,
         'turnstile_id' => $turnstile->id,
-        'scanned_at' => now()->subMinutes(10),
+        'scanned_at' => now()->subSeconds(6),
     ]);
 
     $this->actingAs($employee);
-    $profileImageUrl = Storage::disk('public')->url('profile-images/maria.png');
 
     $this->get(route('attendance-display'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->has('panels', 4)
-            ->where('panels.0.profileImage', $profileImageUrl)
-            ->where('panels.0.state', 'idle')
-            ->where('panels.0.actionLabel', 'Time Out')
-            ->where('panels.0.role', 'Employee')
+            ->where('panels.0.state', 'waiting')
             ->where('panels.1.state', 'waiting')
         );
 
@@ -104,6 +101,7 @@ test('attendance display supports partial reloads for panels', function (): void
         'first_name' => 'Elena',
         'middle_name' => 'Santos',
         'last_name' => 'Rivera',
+        'profile_image' => null,
     ]);
 
     $student->studentDetail()->update([
@@ -116,7 +114,7 @@ test('attendance display supports partial reloads for panels', function (): void
     AttendanceLog::factory()->timeIn()->create([
         'user_id' => $student->id,
         'turnstile_id' => $turnstile->id,
-        'scanned_at' => now()->subSeconds(30),
+        'scanned_at' => now()->subSeconds(2),
     ]);
 
     $this->actingAs($student);
@@ -132,5 +130,7 @@ test('attendance display supports partial reloads for panels', function (): void
         ->assertJsonPath('component', 'attendance-display')
         ->assertJsonPath('props.panels.0.name', 'Elena S. Rivera')
         ->assertJsonPath('props.panels.0.gradeSection', 'Grade 11 | Hope')
+        ->assertJsonPath('props.panels.0.profileImage', null)
+        ->assertJsonPath('props.panels.0.timeLabel', '9:29:58 AM')
         ->assertJsonMissingPath('props.tickerItems');
 });
