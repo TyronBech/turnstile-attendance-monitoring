@@ -58,7 +58,7 @@ test('attendance display page shows recent tap panels to authenticated users', f
         );
 });
 
-test('attendance display returns to awaiting panels after five seconds', function (): void {
+test('attendance display returns to awaiting panels after twelve seconds', function (): void {
     $this->travelTo(now()->setTime(9, 0, 0));
 
     expect(Schema::hasColumn('usr_users', 'profile_image'))->toBeTrue();
@@ -78,7 +78,7 @@ test('attendance display returns to awaiting panels after five seconds', functio
     AttendanceLog::factory()->timeOut()->create([
         'user_id' => $employee->id,
         'turnstile_id' => $turnstile->id,
-        'scanned_at' => now()->subSeconds(6),
+        'scanned_at' => now()->subSeconds(13),
     ]);
 
     $this->actingAs($employee);

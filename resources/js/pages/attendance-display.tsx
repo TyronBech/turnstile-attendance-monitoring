@@ -66,10 +66,11 @@ export default function AttendanceDisplay({
     panels,
     tickerItems,
 }: AttendanceDisplayProps) {
+    const pollIntervalMs = 1000;
     const { orgInitial, orgName, theme } = useUiTheme();
     const [now, setNow] = useState(() => new Date());
 
-    usePoll(3000, {
+    usePoll(pollIntervalMs, {
         only: ['panels'],
     }, {
         keepAlive: true,

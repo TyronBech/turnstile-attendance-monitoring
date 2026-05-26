@@ -11,7 +11,7 @@ class AttendanceDisplayController extends Controller
 {
     private const PANEL_LIMIT = 4;
 
-    private const PANEL_DISPLAY_WINDOW_SECONDS = 5;
+    private const PANEL_DISPLAY_WINDOW_SECONDS = 12;
 
     public function show(): Response
     {
