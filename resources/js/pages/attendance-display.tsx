@@ -70,6 +70,8 @@ export default function AttendanceDisplay({
 
     usePoll(3000, {
         only: ['panels'],
+    }, {
+        keepAlive: true,
     });
 
     useEffect(() => {
