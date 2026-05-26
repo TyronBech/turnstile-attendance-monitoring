@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\AttendanceLog;
 use App\Models\Turnstile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -93,4 +95,42 @@ test('attendance display is rendered from attendance logs without a dedicated fe
         );
 
     $this->get('/attendance-display/feed')->assertNotFound();
+});
+
+test('attendance display supports partial reloads for panels', function (): void {
+    $this->travelTo(now()->setTime(9, 30, 0));
+
+    $student = User::factory()->create([
+        'first_name' => 'Elena',
+        'middle_name' => 'Santos',
+        'last_name' => 'Rivera',
+    ]);
+
+    $student->studentDetail()->update([
+        'level' => 'Grade 11',
+        'section' => 'Hope',
+    ]);
+
+    $turnstile = Turnstile::factory()->create();
+
+    AttendanceLog::factory()->timeIn()->create([
+        'user_id' => $student->id,
+        'turnstile_id' => $turnstile->id,
+        'scanned_at' => now()->subSeconds(30),
+    ]);
+
+    $this->actingAs($student);
+    $version = app(HandleInertiaRequests::class)->version(Request::create(route('attendance-display')));
+
+    $this->withHeaders([
+        'X-Inertia' => 'true',
+        'X-Inertia-Version' => $version,
+        'X-Inertia-Partial-Component' => 'attendance-display',
+        'X-Inertia-Partial-Data' => 'panels',
+    ])->get(route('attendance-display'))
+        ->assertOk()
+        ->assertJsonPath('component', 'attendance-display')
+        ->assertJsonPath('props.panels.0.name', 'Elena S. Rivera')
+        ->assertJsonPath('props.panels.0.gradeSection', 'Grade 11 | Hope')
+        ->assertJsonMissingPath('props.tickerItems');
 });

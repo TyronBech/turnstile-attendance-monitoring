@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePoll } from '@inertiajs/react';
 import { LogOut } from 'lucide-react';
 import { useEffect, useState, type CSSProperties } from 'react';
 import { useUiTheme } from '@/hooks/use-ui-theme';
@@ -62,12 +62,15 @@ function PanelBackgroundImage({ imageUrl, name }: PanelBackgroundImageProps) {
 }
 
 export default function AttendanceDisplay({
-    panels: initialPanels,
+    panels,
     tickerItems,
 }: AttendanceDisplayProps) {
     const { orgInitial, orgName, theme } = useUiTheme();
-    const [panels] = useState(initialPanels);
     const [now, setNow] = useState(() => new Date());
+
+    usePoll(3000, {
+        only: ['panels'],
+    });
 
     useEffect(() => {
         const clockIntervalId = window.setInterval(() => {
