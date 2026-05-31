@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Queue;
 
 beforeEach(function (): void {
     config([
-        'services.semaphore.api_key' => 'test-api-key',
-        'services.semaphore.api_url' => 'https://api.semaphore.test/messages',
-        'services.semaphore.sender_name' => 'SNCS',
+        'services.unisms.api_key' => 'test-api-key',
+        'services.unisms.api_url' => 'https://unismsapi.test/api/sms',
+        'services.unisms.sender_id' => 'SNCS',
     ]);
 
     $this->turnstile = Turnstile::factory()->create([
@@ -28,8 +28,8 @@ beforeEach(function (): void {
     $this->token = $this->turnstile->createToken('test-device', ['attendance:scan'])->plainTextToken;
 });
 
-it('dispatches guardian sms job when semaphore is enabled', function (): void {
-    config(['services.semaphore.enabled' => true]);
+it('dispatches guardian sms job when unisms is enabled', function (): void {
+    config(['services.unisms.enabled' => true]);
     Queue::fake();
 
     $this->withToken($this->token)
@@ -43,8 +43,8 @@ it('dispatches guardian sms job when semaphore is enabled', function (): void {
     });
 });
 
-it('does not dispatch sms job when semaphore is disabled', function (): void {
-    config(['services.semaphore.enabled' => false]);
+it('does not dispatch sms job when unisms is disabled', function (): void {
+    config(['services.unisms.enabled' => false]);
     Queue::fake();
 
     $this->withToken($this->token)
@@ -57,7 +57,7 @@ it('does not dispatch sms job when semaphore is disabled', function (): void {
 });
 
 it('does not dispatch sms job without guardian contact number', function (): void {
-    config(['services.semaphore.enabled' => true]);
+    config(['services.unisms.enabled' => true]);
     Queue::fake();
 
     $this->student->update(['guardian_contact_number' => '']);

@@ -28,8 +28,8 @@ class DispatchPendingAttendanceSmsCommand extends Command
      */
     public function handle(): int
     {
-        if (! config('services.semaphore.enabled') || ! filled((string) config('services.semaphore.api_key'))) {
-            $this->warn('Semaphore is disabled or SEMAPHORE_API_KEY is empty. Nothing dispatched.');
+        if (! config('services.unisms.enabled') || ! filled((string) config('services.unisms.api_key'))) {
+            $this->warn('UniSMS is disabled or UNISMS_API_KEY is empty. Nothing dispatched.');
 
             return self::SUCCESS;
         }

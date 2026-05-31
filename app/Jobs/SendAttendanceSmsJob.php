@@ -3,14 +3,13 @@
 namespace App\Jobs;
 
 use App\Models\AttendanceLog;
-use App\Services\SemaphoreSmsService;
+use App\Services\UniSmsService;
 use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Carbon;
 
 class SendAttendanceSmsJob implements ShouldQueue
 {
@@ -33,7 +32,7 @@ class SendAttendanceSmsJob implements ShouldQueue
         return [30, 120, 300];
     }
 
-    public function handle(SemaphoreSmsService $sms): void
+    public function handle(UniSmsService $sms): void
     {
         $log = AttendanceLog::query()
             ->with(['user.studentDetail', 'turnstile'])
@@ -64,7 +63,7 @@ class SendAttendanceSmsJob implements ShouldQueue
             ? $log->scanned_at->timezone(config('app.timezone'))->format('g:i A')
             : now()->format('g:i A');
 
-        $schoolName = (string) config('services.semaphore.sender_name', 'School');
+        $schoolName = (string) config('services.unisms.sender_id', config('app.name', 'School'));
         $message = $log->action === 'IN'
             ? "[{$schoolName}]: Your child, {$studentName}, has arrived at school at {$timeLabel}. Thank you!"
             : "[{$schoolName}]: Your child, {$studentName}, has left school at {$timeLabel}. Thank You!";
@@ -76,7 +75,7 @@ class SendAttendanceSmsJob implements ShouldQueue
         $ok = $sms->send($guardianNumber, $message);
 
         if (! $ok) {
-            throw new \RuntimeException('Semaphore SMS send failed');
+            throw new \RuntimeException('UniSMS send failed');
         }
 
         $log->forceFill(['sms_status' => 'SENT'])->save();

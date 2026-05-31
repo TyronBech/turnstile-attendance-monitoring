@@ -7,6 +7,7 @@ use App\Models\AttendanceLog;
 use App\Models\Turnstile;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AttendanceService
@@ -55,11 +56,11 @@ class AttendanceService
 
     private function shouldQueueGuardianSms(User $student): bool
     {
-        if (! config('services.semaphore.enabled')) {
+        if (! config('services.unisms.enabled')) {
             return false;
         }
 
-        if (! filled((string) config('services.semaphore.api_key'))) {
+        if (! filled((string) config('services.unisms.api_key'))) {
             return false;
         }
 
@@ -87,8 +88,8 @@ class AttendanceService
      * Process an array of RFID scans, returning logs of successful scans.
      * Skips invalid RFIDs so the batch can still be completed.
      *
-     * @param array<string> $rfids
-     * @return \Illuminate\Support\Collection<int, AttendanceLog>
+     * @param  array<string>  $rfids
+     * @return Collection<int, AttendanceLog>
      */
     public function processBatchScans(Turnstile $turnstile, array $rfids)
     {
