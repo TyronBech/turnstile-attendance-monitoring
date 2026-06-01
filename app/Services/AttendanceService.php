@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceService
 {
@@ -45,9 +46,25 @@ class AttendanceService
             ]);
 
             if ($this->shouldQueueGuardianSms($student)) {
+                Log::info('Attendance SMS queued.', [
+                    'attendance_log_id' => $log->id,
+                    'user_id' => $student->id,
+                    'turnstile_id' => $turnstile->id,
+                    'action' => $action,
+                    'guardian_contact_number' => $student->studentDetail?->guardian_contact_number,
+                ]);
+
                 SendAttendanceSmsJob::dispatch($log->id)
                     ->afterCommit()
                     ->afterResponse();
+            } else {
+                Log::info('Attendance SMS skipped before queue.', [
+                    'attendance_log_id' => $log->id,
+                    'user_id' => $student->id,
+                    'turnstile_id' => $turnstile->id,
+                    'action' => $action,
+                    'reason' => $this->smsSkipReason($student),
+                ]);
             }
 
             return $log;
@@ -65,6 +82,23 @@ class AttendanceService
         }
 
         return filled($student->studentDetail?->guardian_contact_number);
+    }
+
+    private function smsSkipReason(User $student): string
+    {
+        if (! config('services.unisms.enabled')) {
+            return 'unisms_disabled';
+        }
+
+        if (! filled((string) config('services.unisms.api_key'))) {
+            return 'missing_api_key';
+        }
+
+        if (! filled($student->studentDetail?->guardian_contact_number)) {
+            return 'missing_guardian_contact_number';
+        }
+
+        return 'not_skipped';
     }
 
     /**
