@@ -55,8 +55,7 @@ class AttendanceService
                 ]);
 
                 SendAttendanceSmsJob::dispatch($log->id)
-                    ->afterCommit()
-                    ->afterResponse();
+                    ->afterCommit();
             } else {
                 Log::info('Attendance SMS skipped before queue.', [
                     'attendance_log_id' => $log->id,
