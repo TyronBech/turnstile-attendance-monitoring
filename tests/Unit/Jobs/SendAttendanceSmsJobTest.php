@@ -8,6 +8,7 @@ use App\Services\UniSmsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 use function Pest\Laravel\mock;
@@ -25,6 +26,7 @@ beforeEach(function (): void {
 
 it('sends sms and marks attendance log as sent when unisms succeeds', function (): void {
     $this->travelTo(Carbon::create(2026, 5, 24, 8, 6, 0, config('app.timezone')));
+    Log::spy();
 
     $user = User::factory()->create([
         'first_name' => 'Tyron',
@@ -55,6 +57,11 @@ it('sends sms and marks attendance log as sent when unisms succeeds', function (
     $job->handle($sms);
 
     expect($log->fresh()->sms_status)->toBe('SENT');
+
+    Log::shouldHaveReceived('info')
+        ->with('Attendance SMS job started.', Mockery::on(fn (array $context): bool => $context['attendance_log_id'] === $log->id));
+    Log::shouldHaveReceived('info')
+        ->with('Attendance SMS marked as sent.', Mockery::on(fn (array $context): bool => $context['attendance_log_id'] === $log->id));
 });
 
 it('adds the apology when the sms is delayed', function (): void {
@@ -90,6 +97,8 @@ it('adds the apology when the sms is delayed', function (): void {
 });
 
 it('throws when unisms rejects so the queue can retry', function (): void {
+    Log::spy();
+
     $user = User::factory()->create([
         'guardian_contact_number' => '09171234567',
         'status' => true,
@@ -110,9 +119,14 @@ it('throws when unisms rejects so the queue can retry', function (): void {
         ->toThrow(RuntimeException::class, 'UniSMS send failed');
 
     expect($log->fresh()->sms_status)->toBe('PENDING');
+
+    Log::shouldHaveReceived('warning')
+        ->with('Attendance SMS provider call returned false.', Mockery::on(fn (array $context): bool => $context['attendance_log_id'] === $log->id));
 });
 
 it('marks log as failed when failed callback runs', function (): void {
+    Log::spy();
+
     $user = User::factory()->create([
         'guardian_contact_number' => '09171234567',
         'status' => true,
@@ -128,6 +142,9 @@ it('marks log as failed when failed callback runs', function (): void {
     $job->failed(new RuntimeException('exhausted'));
 
     expect($log->fresh()->sms_status)->toBe('FAILED');
+
+    Log::shouldHaveReceived('error')
+        ->with('Attendance SMS job failed permanently.', Mockery::on(fn (array $context): bool => $context['attendance_log_id'] === $log->id));
 });
 
 it('does nothing when log is already sent', function (): void {
