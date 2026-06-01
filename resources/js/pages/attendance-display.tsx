@@ -4,6 +4,7 @@ import { useEffect, useState  } from 'react';
 import type {CSSProperties} from 'react';
 import { useUiTheme } from '@/hooks/use-ui-theme';
 import { logout } from '@/routes';
+import popQueryLogo from '../../../public/PopQuery-Logo.svg';
 
 type AttendancePanel = {
     id: number | string;
@@ -248,7 +249,15 @@ export default function AttendanceDisplay({
                         </div>
 
                         <div className="shrink-0 text-right">
-                            <div className="font-semibold text-white/55">Powered by OwlQuery</div>
+                            <div className="flex items-center justify-end gap-2">
+                            
+                                <div className="font-semibold text-white/55">Powered by PopQuery</div>
+                                    <img
+                                    src={popQueryLogo}
+                                    alt="PopQuery"
+                                    className="h-7 w-auto shrink-0"
+                                />
+                            </div>
                         </div>
                     </footer>
                 </div>
