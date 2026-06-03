@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AttendanceDisplayController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome', [
@@ -13,7 +14,8 @@ Route::middleware(['auth'])->group(function (): void {
 });
 
 Route::middleware(['auth', 'verified', 'restrict-live-monitoring'])->group(function (): void {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'show'])->name('dashboard');
+    Route::post('dashboard/retry-sms/{attendanceLog}', [DashboardController::class, 'retrySms'])->name('dashboard.retry-sms');
 });
 
 require __DIR__.'/settings.php';
