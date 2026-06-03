@@ -1,5 +1,5 @@
 import { AppThemeProvider } from '@/components/app-theme-provider';
-import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
+import AppLayoutTemplate from '@/layouts/app/app-header-layout';
 import type { BreadcrumbItem } from '@/types';
 
 export default function AppLayout({
