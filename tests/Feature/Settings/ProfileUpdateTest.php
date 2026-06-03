@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\StudentDetail;
 use App\Models\User;
 
 test('profile page is displayed', function () {
@@ -37,6 +38,13 @@ test('profile information can be updated', function () {
     expect($user->last_name)->toBe('Doe');
     expect($user->email)->toBe('test@example.com');
     expect($user->email_verified_at)->toBeNull();
+
+    $this->assertDatabaseHas((new StudentDetail)->getTable(), [
+        'user_id' => $user->id,
+        'id_number' => '0987654321',
+        'guardian_name' => 'John Doe',
+        'guardian_contact_number' => '09876543210',
+    ]);
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {

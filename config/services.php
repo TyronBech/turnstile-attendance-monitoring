@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | UniSMS (Philippines)
+    |--------------------------------------------------------------------------
+    */
+    'unisms' => [
+        'enabled' => env('UNISMS_ENABLED', false),
+        'api_key' => env('UNISMS_API_KEY'),
+        'sender_id' => env('UNISMS_SENDER_ID', ''),
+        'api_url' => env('UNISMS_API_URL', 'https://unismsapi.com/api/sms'),
+    ],
+
 ];

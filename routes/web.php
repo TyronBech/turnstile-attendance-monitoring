@@ -1,13 +1,18 @@
 <?php
 
+use App\Http\Controllers\AttendanceDisplayController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
 
 Route::inertia('/', 'welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
+    'canRegister' => false,
 ])->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function (): void {
+    Route::get('attendance-display', [AttendanceDisplayController::class, 'show'])
+        ->name('attendance-display');
+});
+
+Route::middleware(['auth', 'verified', 'restrict-live-monitoring'])->group(function (): void {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 });
 

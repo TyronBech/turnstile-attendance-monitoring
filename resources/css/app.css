@@ -140,4 +140,111 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    input[data-slot='input'] {
+        color: #000;
+        -webkit-text-fill-color: #000;
+    }
+
+    input[data-slot='input']::placeholder {
+        -webkit-text-fill-color: #6b7280;
+    }
+
+    input[data-slot='input']:-webkit-autofill,
+    input[data-slot='input']:-webkit-autofill:hover,
+    input[data-slot='input']:-webkit-autofill:focus {
+        -webkit-text-fill-color: #000;
+        box-shadow: 0 0 0 1000px #fff inset;
+        transition: background-color 9999s ease-in-out 0s;
+    }
+}
+
+@keyframes attendance-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgb(var(--attendance-accent) / 0.65);
+    }
+
+    70% {
+        transform: scale(1.08);
+        box-shadow: 0 0 0 18px rgb(var(--attendance-accent) / 0);
+    }
+}
+
+@keyframes attendance-ticker {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    100% {
+        transform: translate3d(-33.333%, 0, 0);
+    }
+}
+
+@layer components {
+    .attendance-display {
+        background:
+            radial-gradient(circle at top left, rgb(255 190 92 / 0.2), transparent 28%),
+            radial-gradient(circle at top right, rgb(255 110 42 / 0.16), transparent 26%),
+            linear-gradient(135deg, #170d09 0%, #090909 52%, #1b100b 100%);
+    }
+
+    .attendance-live-dot {
+        animation: attendance-pulse 1.4s infinite;
+    }
+
+    .attendance-panels {
+        display: flex;
+        min-width: 0;
+        width: 100%;
+        gap: 0;
+        padding: 0;
+    }
+
+    .attendance-panel {
+        flex: 1 1 0;
+        min-width: 0;
+        margin: 0 0.175rem;
+    }
+
+    .attendance-panel:first-child {
+        margin-left: 0;
+    }
+
+    .attendance-panel:last-child {
+        margin-right: 0;
+    }
+
+    .attendance-ticker-track {
+        display: flex;
+        width: max-content;
+        align-items: center;
+        animation: attendance-ticker 54s linear infinite;
+    }
+
+    .attendance-ticker-group {
+        display: flex;
+        flex: none;
+        align-items: center;
+    }
+
+    .attendance-ticker-item {
+        position: relative;
+        flex: none;
+        padding-right: 5rem;
+        white-space: nowrap;
+        font-weight: 500;
+    }
+
+    .attendance-ticker-item::after {
+        content: '•';
+        position: absolute;
+        right: 2rem;
+        color: rgb(255 255 255 / 0.4);
+    }
+
+    .attendance-ticker-group:last-child .attendance-ticker-item:last-child::after {
+        content: '';
+    }
 }

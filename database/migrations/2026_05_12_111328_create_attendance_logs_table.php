@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('attendance_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained(table: 'users', column: 'id')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained(table: 'usr_users', column: 'id')->cascadeOnDelete();
             $table->foreignId('turnstile_id')->constrained(table: 'turnstiles', column: 'id')->cascadeOnDelete();
             $table->enum('action', ['IN', 'OUT']);
             $table->timestamp('scanned_at');

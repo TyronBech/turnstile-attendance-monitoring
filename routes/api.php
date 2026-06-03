@@ -35,6 +35,14 @@ Route::prefix('v1')->middleware([EnsureJsonRequest::class])->group(function (): 
         Route::post('/attendance/scan', [AttendanceController::class, 'scan'])
             ->name('api.v1.attendance.scan');
 
+        // Batch sync offline logs
+        Route::post('/attendance/sync', [AttendanceController::class, 'sync'])
+            ->name('api.v1.attendance.sync');
+
+        // Fetch students for offline validation
+        Route::get('/turnstile/students', [AttendanceController::class, 'students'])
+            ->name('api.v1.turnstile.students');
+
         // Health check — verifies the turnstile's token is valid
         Route::get('/turnstile/ping', function (Request $request): JsonResponse {
             $turnstile = $request->user();

@@ -2,6 +2,7 @@
 
 namespace App\Concerns;
 
+use App\Models\StudentDetail;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
@@ -16,7 +17,14 @@ trait ProfileValidationRules
     protected function profileRules(?int $userId = null): array
     {
         return [
-            'student_id' => ['required', 'string', 'max:255', $userId === null ? Rule::unique(User::class) : Rule::unique(User::class)->ignore($userId)],
+            'student_id' => [
+                'required',
+                'string',
+                'max:255',
+                $userId === null
+                    ? Rule::unique(StudentDetail::class, 'id_number')
+                    : Rule::unique(StudentDetail::class, 'id_number')->ignore($userId, 'user_id'),
+            ],
             'rfid' => ['required', 'string', 'max:255', $userId === null ? Rule::unique(User::class) : Rule::unique(User::class)->ignore($userId)],
             'first_name' => ['required', 'string', 'max:255'],
             'middle_name' => ['nullable', 'string', 'max:255'],

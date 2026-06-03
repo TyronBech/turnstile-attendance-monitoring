@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Turnstile;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Log;
 
 class TurnstileSeeder extends Seeder
 {
@@ -49,10 +48,5 @@ class TurnstileSeeder extends Seeder
         $this->command->info('║     Body: { "rfid": "<student_rfid>" }                      ║');
         $this->command->info('╚══════════════════════════════════════════════════════════════╝');
         $this->command->info('');
-
-        Log::info('Turnstile token generated', [
-            'turnstile_id' => $turnstile->id,
-            'turnstile_name' => $turnstile->name,
-        ]);
     }
 }
