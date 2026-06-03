@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Permission;
 use App\Http\Controllers\AttendanceDisplayController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -13,7 +14,7 @@ Route::middleware(['auth'])->group(function (): void {
         ->name('attendance-display');
 });
 
-Route::middleware(['auth', 'verified', 'restrict-live-monitoring'])->group(function (): void {
+Route::middleware(['auth', 'verified', 'restrict-live-monitoring', 'permission:'.Permission::ViewDashboard->value])->group(function (): void {
     Route::get('dashboard', [DashboardController::class, 'show'])->name('dashboard');
     Route::post('dashboard/retry-sms/{attendanceLog}', [DashboardController::class, 'retrySms'])->name('dashboard.retry-sms');
 });
