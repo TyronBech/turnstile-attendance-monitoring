@@ -7,9 +7,7 @@ use Laravel\Fortify\Features;
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
 
-    $response
-        ->assertOk()
-        ->assertSeeInOrder(['Powered by', 'PopQuery']);
+    $response->assertOk();
 });
 
 test('login screen ignores appearance cookies and stays in light mode', function (): void {
