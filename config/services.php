@@ -37,14 +37,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Semaphore SMS (Philippines) — same integration pattern as BPS_LIBRARY
+    | UniSMS (Philippines)
     |--------------------------------------------------------------------------
     */
-    'semaphore' => [
-        'enabled' => env('SEMAPHORE_ENABLED', false),
-        'api_key' => env('SEMAPHORE_API_KEY'),
-        'sender_name' => env('SEMAPHORE_SENDER_NAME', ''),
-        'api_url' => env('SEMAPHORE_API_URL', 'https://api.semaphore.co/api/v4/messages'),
+    'unisms' => [
+        'enabled' => env('UNISMS_ENABLED', false),
+        'api_key' => env('UNISMS_API_KEY'),
+        'sender_id' => env('UNISMS_SENDER_ID', ''),
+        'api_url' => env('UNISMS_API_URL', 'https://unismsapi.com/api/sms'),
     ],
 
 ];

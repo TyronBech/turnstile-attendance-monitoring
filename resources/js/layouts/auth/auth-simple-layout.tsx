@@ -1,7 +1,7 @@
-import { Link } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
+import { OrgFooter } from '@/components/org-footer';
+import { OrgHeader } from '@/components/org-header';
 import { useUiTheme } from '@/hooks/use-ui-theme';
-import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 
 export default function AuthSimpleLayout({
@@ -9,7 +9,7 @@ export default function AuthSimpleLayout({
     title,
     description,
 }: AuthLayoutProps) {
-    const { theme, palette, rgb, orgInitial, orgName } = useUiTheme();
+    const { theme, palette, rgb, orgName } = useUiTheme();
     const primary700 = rgb(palette.primary['700']);
 
     return (
@@ -19,50 +19,7 @@ export default function AuthSimpleLayout({
                 background: `linear-gradient(180deg, ${rgb(palette.secondary['50'])} 0%, ${rgb(palette.primary['50'])} 100%)`,
             }}
         >
-            <header
-                className="border-b px-6 py-5 text-white md:px-10"
-                style={{
-                    backgroundColor: primary700,
-                    borderColor: rgb(palette.primary['600']),
-                }}
-            >
-                <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4">
-                    <Link
-                        href={home()}
-                        className="flex items-center gap-3 font-medium"
-                    >
-                        <div
-                            className="flex h-11 w-11 items-center justify-center rounded-2xl border"
-                            style={{
-                                backgroundColor: rgb(palette.primary['500'], 0.22),
-                                borderColor: rgb(palette.primary['500'], 0.45),
-                            }}
-                        >
-                            {theme.logoUrl ? (
-                                <img
-                                    src={theme.logoUrl}
-                                    alt={orgName}
-                                    className="h-7 w-7 object-contain"
-                                />
-                            ) : (
-                                <AppLogoIcon className="size-7 fill-current text-white" />
-                            )}
-                        </div>
-                        <div>
-                            <p className="text-sm/4 font-semibold tracking-[0.22em] uppercase text-white/70">
-                                {orgInitial}
-                            </p>
-                            <p className="text-sm font-medium text-white">
-                                {orgName}
-                            </p>
-                        </div>
-                    </Link>
-                    <div className="hidden text-right text-sm text-white/72 md:block">
-                        <p className="font-medium">{title}</p>
-                        <p>{description}</p>
-                    </div>
-                </div>
-            </header>
+            <OrgHeader variant="auth" maxWidth="max-w-5xl" authTitle={title} authDescription={description} />
 
             <main className="flex flex-1 items-center justify-center px-6 py-10 md:px-10 md:py-14">
                 <div className="w-full max-w-md">
@@ -115,18 +72,7 @@ export default function AuthSimpleLayout({
                 </div>
             </main>
 
-            <footer
-                className="border-t px-6 py-4 text-white md:px-10"
-                style={{
-                    backgroundColor: primary700,
-                    borderColor: rgb(palette.primary['600']),
-                }}
-            >
-                <div className="mx-auto flex w-full max-w-5xl flex-col gap-1 text-sm md:flex-row md:items-center md:justify-between">
-                    <p className="font-medium text-white">{orgName}</p>
-                    <p className="text-white/72">Attendance system.</p>
-                </div>
-            </footer>
+            <OrgFooter maxWidth="max-w-5xl" />
         </div>
     );
 }

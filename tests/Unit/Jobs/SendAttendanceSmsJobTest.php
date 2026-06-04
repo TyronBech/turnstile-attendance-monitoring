@@ -4,11 +4,13 @@ use App\Jobs\SendAttendanceSmsJob;
 use App\Models\AttendanceLog;
 use App\Models\Turnstile;
 use App\Models\User;
-use App\Services\SemaphoreSmsService;
+use App\Services\UniSmsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
+
 use function Pest\Laravel\mock;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -16,14 +18,15 @@ uses(TestCase::class, RefreshDatabase::class);
 beforeEach(function (): void {
     config([
         'logging.default' => 'null',
-        'services.semaphore.api_key' => 'test-api-key',
-        'services.semaphore.api_url' => 'https://api.semaphore.co/api/v1/messages',
-        'services.semaphore.sender_name' => 'SNCS',
+        'services.unisms.api_key' => 'test-api-key',
+        'services.unisms.api_url' => 'https://unismsapi.test/api/sms',
+        'services.unisms.sender_id' => 'SNCS',
     ]);
 });
 
-it('sends sms and marks attendance log as sent when semaphore succeeds', function (): void {
+it('sends sms and marks attendance log as sent when unisms succeeds', function (): void {
     $this->travelTo(Carbon::create(2026, 5, 24, 8, 6, 0, config('app.timezone')));
+    Log::spy();
 
     $user = User::factory()->create([
         'first_name' => 'Tyron',
@@ -41,7 +44,7 @@ it('sends sms and marks attendance log as sent when semaphore succeeds', functio
         'sms_status' => 'PENDING',
     ]);
 
-    $sms = mock(SemaphoreSmsService::class);
+    $sms = mock(UniSmsService::class);
     $sms->shouldReceive('send')
         ->once()
         ->with(
@@ -54,6 +57,11 @@ it('sends sms and marks attendance log as sent when semaphore succeeds', functio
     $job->handle($sms);
 
     expect($log->fresh()->sms_status)->toBe('SENT');
+
+    Log::shouldHaveReceived('info')
+        ->with('Attendance SMS job started.', Mockery::on(fn (array $context): bool => $context['attendance_log_id'] === $log->id));
+    Log::shouldHaveReceived('info')
+        ->with('Attendance SMS marked as sent.', Mockery::on(fn (array $context): bool => $context['attendance_log_id'] === $log->id));
 });
 
 it('adds the apology when the sms is delayed', function (): void {
@@ -75,7 +83,7 @@ it('adds the apology when the sms is delayed', function (): void {
         'sms_status' => 'PENDING',
     ]);
 
-    $sms = mock(SemaphoreSmsService::class);
+    $sms = mock(UniSmsService::class);
     $sms->shouldReceive('send')
         ->once()
         ->with(
@@ -88,7 +96,9 @@ it('adds the apology when the sms is delayed', function (): void {
     $job->handle($sms);
 });
 
-it('throws when semaphore rejects so the queue can retry', function (): void {
+it('throws when unisms rejects so the queue can retry', function (): void {
+    Log::spy();
+
     $user = User::factory()->create([
         'guardian_contact_number' => '09171234567',
         'status' => true,
@@ -100,18 +110,23 @@ it('throws when semaphore rejects so the queue can retry', function (): void {
         'sms_status' => 'PENDING',
     ]);
 
-    $sms = mock(SemaphoreSmsService::class);
+    $sms = mock(UniSmsService::class);
     $sms->shouldReceive('send')->once()->andReturnFalse();
 
     $job = new SendAttendanceSmsJob($log->id);
 
     expect(fn () => $job->handle($sms))
-        ->toThrow(RuntimeException::class, 'Semaphore SMS send failed');
+        ->toThrow(RuntimeException::class, 'UniSMS send failed');
 
     expect($log->fresh()->sms_status)->toBe('PENDING');
+
+    Log::shouldHaveReceived('warning')
+        ->with('Attendance SMS provider call returned false.', Mockery::on(fn (array $context): bool => $context['attendance_log_id'] === $log->id));
 });
 
 it('marks log as failed when failed callback runs', function (): void {
+    Log::spy();
+
     $user = User::factory()->create([
         'guardian_contact_number' => '09171234567',
         'status' => true,
@@ -127,11 +142,19 @@ it('marks log as failed when failed callback runs', function (): void {
     $job->failed(new RuntimeException('exhausted'));
 
     expect($log->fresh()->sms_status)->toBe('FAILED');
+
+    Log::shouldHaveReceived('error')
+        ->with('Attendance SMS job failed permanently.', Mockery::on(fn (array $context): bool => $context['attendance_log_id'] === $log->id));
 });
 
 it('does nothing when log is already sent', function (): void {
     Http::fake([
-        'https://api.semaphore.co/api/v1/messages' => Http::response([['status' => '1']], 200),
+        'https://unismsapi.test/api/sms' => Http::response([
+            'message' => [
+                'status' => 'sent',
+                'reference_id' => 'msg_test_123',
+            ],
+        ], 201),
     ]);
 
     $user = User::factory()->create(['guardian_contact_number' => '09171234567']);
@@ -143,7 +166,7 @@ it('does nothing when log is already sent', function (): void {
     ]);
 
     $job = new SendAttendanceSmsJob($log->id);
-    $job->handle(app(SemaphoreSmsService::class));
+    $job->handle(app(UniSmsService::class));
 
     Http::assertNothingSent();
 });

@@ -1,8 +1,13 @@
 <?php
 
 use App\Models\User;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
+
+beforeEach(function (): void {
+    $this->seed(RolesAndPermissionsSeeder::class);
+});
 
 test('dashboard shares computed theme settings from ui settings', function (): void {
     $png = base64_decode(
@@ -29,6 +34,7 @@ test('dashboard shares computed theme settings from ui settings', function (): v
     ]);
 
     $user = User::factory()->create();
+    $user->givePermissionTo('view_dashboard');
 
     $this->actingAs($user)
         ->get(route('dashboard'))
@@ -47,6 +53,7 @@ test('dashboard shares computed theme settings from ui settings', function (): v
 
 test('dashboard falls back to default theme colors when ui settings are missing or invalid', function (): void {
     $user = User::factory()->create();
+    $user->givePermissionTo('view_dashboard');
 
     $this->actingAs($user)
         ->get(route('dashboard'))

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Permission;
 use App\Http\Controllers\AttendanceDisplayController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;

@@ -4,13 +4,14 @@ use App\Jobs\SendAttendanceSmsJob;
 use App\Models\AttendanceLog;
 use App\Models\Turnstile;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 
 beforeEach(function (): void {
     config([
-        'services.semaphore.api_key' => 'test-api-key',
-        'services.semaphore.api_url' => 'https://api.semaphore.test/messages',
-        'services.semaphore.sender_name' => 'SNCS',
+        'services.unisms.api_key' => 'test-api-key',
+        'services.unisms.api_url' => 'https://unismsapi.test/api/sms',
+        'services.unisms.sender_id' => 'SNCS',
     ]);
 
     $this->turnstile = Turnstile::factory()->create([
@@ -28,8 +29,9 @@ beforeEach(function (): void {
     $this->token = $this->turnstile->createToken('test-device', ['attendance:scan'])->plainTextToken;
 });
 
-it('dispatches guardian sms job when semaphore is enabled', function (): void {
-    config(['services.semaphore.enabled' => true]);
+it('dispatches guardian sms job when unisms is enabled', function (): void {
+    config(['services.unisms.enabled' => true]);
+    Log::spy();
     Queue::fake();
 
     $this->withToken($this->token)
@@ -41,10 +43,19 @@ it('dispatches guardian sms job when semaphore is enabled', function (): void {
     Queue::assertPushed(SendAttendanceSmsJob::class, function (SendAttendanceSmsJob $job): bool {
         return $job->attendanceLogId === AttendanceLog::query()->latest('id')->value('id');
     });
+
+    Log::shouldHaveReceived('info')
+        ->once()
+        ->with('Attendance SMS queued.', Mockery::on(function (array $context): bool {
+            return $context['attendance_log_id'] === AttendanceLog::query()->latest('id')->value('id')
+                && $context['user_id'] === $this->student->id
+                && ! array_key_exists('reason', $context);
+        }));
 });
 
-it('does not dispatch sms job when semaphore is disabled', function (): void {
-    config(['services.semaphore.enabled' => false]);
+it('does not dispatch sms job when unisms is disabled', function (): void {
+    config(['services.unisms.enabled' => false]);
+    Log::spy();
     Queue::fake();
 
     $this->withToken($this->token)
@@ -54,10 +65,17 @@ it('does not dispatch sms job when semaphore is disabled', function (): void {
     $this->app->terminate();
 
     Queue::assertNothingPushed();
+
+    Log::shouldHaveReceived('info')
+        ->once()
+        ->with('Attendance SMS skipped before queue.', Mockery::on(function (array $context): bool {
+            return $context['reason'] === 'unisms_disabled';
+        }));
 });
 
 it('does not dispatch sms job without guardian contact number', function (): void {
-    config(['services.semaphore.enabled' => true]);
+    config(['services.unisms.enabled' => true]);
+    Log::spy();
     Queue::fake();
 
     $this->student->update(['guardian_contact_number' => '']);
@@ -69,4 +87,10 @@ it('does not dispatch sms job without guardian contact number', function (): voi
     $this->app->terminate();
 
     Queue::assertNothingPushed();
+
+    Log::shouldHaveReceived('info')
+        ->once()
+        ->with('Attendance SMS skipped before queue.', Mockery::on(function (array $context): bool {
+            return $context['reason'] === 'missing_guardian_contact_number';
+        }));
 });

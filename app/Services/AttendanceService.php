@@ -7,7 +7,9 @@ use App\Models\AttendanceLog;
 use App\Models\Turnstile;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceService
 {
@@ -44,9 +46,24 @@ class AttendanceService
             ]);
 
             if ($this->shouldQueueGuardianSms($student)) {
+                Log::info('Attendance SMS queued.', [
+                    'attendance_log_id' => $log->id,
+                    'user_id' => $student->id,
+                    'turnstile_id' => $turnstile->id,
+                    'action' => $action,
+                    'guardian_contact_number' => $student->studentDetail?->guardian_contact_number,
+                ]);
+
                 SendAttendanceSmsJob::dispatch($log->id)
-                    ->afterCommit()
-                    ->afterResponse();
+                    ->afterCommit();
+            } else {
+                Log::info('Attendance SMS skipped before queue.', [
+                    'attendance_log_id' => $log->id,
+                    'user_id' => $student->id,
+                    'turnstile_id' => $turnstile->id,
+                    'action' => $action,
+                    'reason' => $this->smsSkipReason($student),
+                ]);
             }
 
             return $log;
@@ -55,15 +72,32 @@ class AttendanceService
 
     private function shouldQueueGuardianSms(User $student): bool
     {
-        if (! config('services.semaphore.enabled')) {
+        if (! config('services.unisms.enabled')) {
             return false;
         }
 
-        if (! filled((string) config('services.semaphore.api_key'))) {
+        if (! filled((string) config('services.unisms.api_key'))) {
             return false;
         }
 
         return filled($student->studentDetail?->guardian_contact_number);
+    }
+
+    private function smsSkipReason(User $student): string
+    {
+        if (! config('services.unisms.enabled')) {
+            return 'unisms_disabled';
+        }
+
+        if (! filled((string) config('services.unisms.api_key'))) {
+            return 'missing_api_key';
+        }
+
+        if (! filled($student->studentDetail?->guardian_contact_number)) {
+            return 'missing_guardian_contact_number';
+        }
+
+        return 'not_skipped';
     }
 
     /**
@@ -87,8 +121,8 @@ class AttendanceService
      * Process an array of RFID scans, returning logs of successful scans.
      * Skips invalid RFIDs so the batch can still be completed.
      *
-     * @param array<string> $rfids
-     * @return \Illuminate\Support\Collection<int, AttendanceLog>
+     * @param  array<string>  $rfids
+     * @return Collection<int, AttendanceLog>
      */
     public function processBatchScans(Turnstile $turnstile, array $rfids)
     {
