@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
@@ -102,14 +103,22 @@ return;
             form.put(`/user-maintenance/users/${user.id}`, {
                 preserveScroll: true,
                 onSuccess: () => {
+                    toast.success('User updated successfully.');
                     onClose();
+                },
+                onError: () => {
+                    toast.error('Failed to update user. Please check the form errors.');
                 },
             });
         } else {
             form.post('/user-maintenance/users', {
                 preserveScroll: true,
                 onSuccess: () => {
+                    toast.success('User created successfully.');
                     onClose();
+                },
+                onError: () => {
+                    toast.error('Failed to create user. Please check the form errors.');
                 },
             });
         }

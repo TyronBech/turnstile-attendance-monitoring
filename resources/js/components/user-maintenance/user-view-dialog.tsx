@@ -150,18 +150,6 @@ onClose();
                             </dl>
                         </div>
                     )}
-
-                    {/* Timestamps */}
-                    <div className="border-t border-slate-200 dark:border-zinc-700" />
-                    <div>
-                        <h3 className="mb-3 text-xs font-semibold text-slate-500 uppercase tracking-wider dark:text-zinc-400">
-                            Record Info
-                        </h3>
-                        <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
-                            <DetailRow label="Created At" value={user.created_at} />
-                            <DetailRow label="Updated At" value={user.updated_at} />
-                        </dl>
-                    </div>
                 </div>
 
                 <DialogFooter>
