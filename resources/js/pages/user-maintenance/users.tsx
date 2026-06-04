@@ -12,6 +12,7 @@ import {
     Users,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -189,8 +190,12 @@ export default function UsersIndex({
         deleteForm.delete(`/user-maintenance/users/${deletingUser.id}`, {
             preserveScroll: true,
             onSuccess: () => {
+                toast.success('User deleted successfully.');
                 setIsDeleteOpen(false);
                 setDeletingUser(null);
+            },
+            onError: () => {
+                toast.error('Failed to delete user. Please try again.');
             },
         });
     }, [deletingUser, deleteForm]);
