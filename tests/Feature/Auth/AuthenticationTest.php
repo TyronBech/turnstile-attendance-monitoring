@@ -10,6 +10,14 @@ test('login screen can be rendered', function () {
     $response->assertOk();
 });
 
+test('login screen keeps dark appearance context when requested', function (): void {
+    $response = $this->withUnencryptedCookies(['appearance' => 'dark'])->get(route('login'));
+
+    $response
+        ->assertOk()
+        ->assertSee('<html lang="en" class="dark">', false);
+});
+
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
