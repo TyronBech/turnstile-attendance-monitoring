@@ -137,14 +137,14 @@ export default function Dashboard({
 
     const activityPoints = todayActivity?.points ?? [];
     const peakHourlyCount = Math.max(...activityPoints.map((point) => point.scanCount), 1);
-    const themedCardClassName = 'border-0 shadow-[0_22px_55px_rgba(15,23,42,0.08)]';
+    const themedCardClassName = 'border bg-transparent shadow-none';
     const sectionSurfaceStyle = {
-        backgroundColor: rgb(palette.secondary['50'], 0.84),
+        backgroundColor: 'transparent',
         borderColor: rgb(palette.primary['200'], 0.95),
         color: rgb(palette.primary['800']),
     } satisfies CSSProperties;
     const mutedSurfaceStyle = {
-        backgroundColor: rgb(palette.secondary['100'], 0.72),
+        backgroundColor: 'transparent',
         borderColor: rgb(palette.primary['200'], 0.82),
         color: rgb(palette.primary['800']),
     } satisfies CSSProperties;
@@ -167,18 +167,13 @@ export default function Dashboard({
     return (
         <>
             <Head title="Dashboard" />
-            <div
-                className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-[1.75rem] p-4"
-                style={{
-                    ...shellStyle,
-                    background: `radial-gradient(circle at top left, ${rgb(palette.secondary['100'])} 0%, ${rgb(palette.secondary['50'])} 38%, ${rgb(palette.primary['50'])} 100%)`,
-                }}
-            >
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4" style={shellStyle}>
                 <section
-                    className="overflow-hidden rounded-[1.75rem] border text-white shadow-[0_26px_70px_rgba(15,23,42,0.18)]"
+                    className="overflow-hidden rounded-[1.75rem] border"
                     style={{
-                        background: `linear-gradient(135deg, ${rgb(palette.primary['800'])} 0%, ${rgb(palette.primary['700'])} 54%, ${rgb(palette.primary['500'])} 100%)`,
+                        backgroundColor: rgb(palette.primary['700']),
                         borderColor: rgb(palette.primary['600'], 0.95),
+                        color: rgb(palette.secondary['50']),
                     }}
                 >
                     <div className="flex flex-col gap-6 px-6 py-6 md:px-8 md:py-7 xl:flex-row xl:items-center xl:justify-between">
@@ -186,8 +181,8 @@ export default function Dashboard({
                             <div
                                 className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.35rem] border"
                                 style={{
-                                    backgroundColor: rgb(palette.secondary['50'], 0.12),
-                                    borderColor: rgb(palette.secondary['50'], 0.24),
+                                    backgroundColor: rgb(palette.secondary['50'], 0.08),
+                                    borderColor: rgb(palette.secondary['50'], 0.22),
                                 }}
                             >
                                 {theme.logoUrl ? (
@@ -206,7 +201,7 @@ export default function Dashboard({
                                     {orgInitial}
                                 </p>
                                 <div>
-                                    <h1 className="text-2xl font-black tracking-tight md:text-3xl">{orgName}</h1>
+                                    <h1 className="text-2xl font-black tracking-tight text-white md:text-3xl">{orgName}</h1>
                                     <p className="mt-1 text-sm text-white/78 md:text-base">
                                         Attendance dashboard for quick operational review and monitoring.
                                     </p>
@@ -218,26 +213,26 @@ export default function Dashboard({
                             <div
                                 className="rounded-2xl border px-4 py-3"
                                 style={{
-                                    backgroundColor: rgb(palette.secondary['50'], 0.1),
+                                    backgroundColor: rgb(palette.secondary['50'], 0.08),
                                     borderColor: rgb(palette.secondary['50'], 0.22),
                                 }}
                             >
                                 <p className="text-xs font-semibold tracking-[0.22em] uppercase text-white/64">
                                     Last Scan
                                 </p>
-                                <p className="mt-2 text-2xl font-black tabular-nums">{summary.lastScanLabel}</p>
+                                <p className="mt-2 text-2xl font-black tabular-nums text-white">{summary.lastScanLabel}</p>
                             </div>
                             <div
                                 className="rounded-2xl border px-4 py-3"
                                 style={{
-                                    backgroundColor: rgb(palette.tertiary['500'], 0.14),
-                                    borderColor: rgb(palette.tertiary['500'], 0.28),
+                                    backgroundColor: rgb(palette.secondary['50'], 0.08),
+                                    borderColor: rgb(palette.secondary['50'], 0.22),
                                 }}
                             >
                                 <p className="text-xs font-semibold tracking-[0.22em] uppercase text-white/72">
                                     Active Devices
                                 </p>
-                                <p className="mt-2 text-2xl font-black tabular-nums">{summary.activeTurnstiles}</p>
+                                <p className="mt-2 text-2xl font-black tabular-nums text-white">{summary.activeTurnstiles}</p>
                             </div>
                         </div>
                     </div>
