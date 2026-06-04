@@ -73,6 +73,13 @@ jobs:
               ls -la public || true
               exit 1
             fi
+            rm -rf build
+            cp -R public/build build
+            if [ ! -f build/manifest.json ]; then
+              echo "Missing build/manifest.json in the document root after copying assets."
+              ls -la || true
+              exit 1
+            fi
             composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
             php artisan optimize:clear --except=cache --no-interaction
             php artisan config:cache
