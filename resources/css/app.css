@@ -137,6 +137,10 @@
         @apply border-border;
     }
 
+    html {
+        scroll-behavior: smooth;
+    }
+
     body {
         @apply bg-background text-foreground;
     }
@@ -183,6 +187,25 @@
 }
 
 @layer components {
+    [data-radix-popper-content-wrapper] {
+        background: transparent !important;
+    }
+
+    [data-slot='dropdown-menu-item'][data-highlighted],
+    [data-slot='dropdown-menu-sub-trigger'][data-highlighted],
+    [data-slot='dropdown-menu-item']:hover,
+    [data-slot='dropdown-menu-sub-trigger']:hover {
+        background-color: var(--dropdown-hover-bg, rgb(67 56 202 / 0.12)) !important;
+        color: var(--dropdown-hover-fg, rgb(67 56 202)) !important;
+    }
+
+    [data-slot='dropdown-menu-item'][data-highlighted] svg,
+    [data-slot='dropdown-menu-sub-trigger'][data-highlighted] svg,
+    [data-slot='dropdown-menu-item']:hover svg,
+    [data-slot='dropdown-menu-sub-trigger']:hover svg {
+        color: var(--dropdown-hover-fg, rgb(67 56 202)) !important;
+    }
+
     .attendance-display {
         background:
             radial-gradient(circle at top left, rgb(255 190 92 / 0.2), transparent 28%),

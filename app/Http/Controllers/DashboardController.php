@@ -2,231 +2,237 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\SendAttendanceSmsJob;
 use App\Models\AttendanceLog;
 use App\Models\Turnstile;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    /**
-     * Render the analytics dashboard with real-time data.
-     */
+    private const RECENT_ACTIVITY_LIMIT = 8;
+
     public function show(): Response
     {
         return Inertia::render('dashboard', [
-            'stats' => $this->buildStats(),
-            'hourlyBreakdown' => Inertia::defer(fn (): array => $this->buildHourlyBreakdown()),
-            'recentActivity' => Inertia::defer(fn (): array => $this->buildRecentActivity()),
-            'turnstiles' => Inertia::defer(fn (): array => $this->buildTurnstileStatuses()),
-            'smsEntries' => Inertia::defer(fn (): array => $this->buildSmsEntries()),
+            'summary' => $this->buildSummary(),
+            'generatedAt' => now()->timezone(config('app.timezone'))->format('g:i A'),
+            'todayActivity' => Inertia::defer(
+                fn (): array => $this->buildTodayActivity(),
+                'dashboard-panels',
+            ),
+            'recentActivity' => Inertia::defer(
+                fn (): array => $this->buildRecentActivity(),
+                'dashboard-panels',
+            ),
+            'turnstileStatus' => Inertia::defer(
+                fn (): array => $this->buildTurnstileStatus(),
+                'dashboard-panels',
+            ),
         ]);
     }
 
     /**
-     * Retry sending SMS for a specific attendance log.
+     * @return array{
+     *     totalIn: int,
+     *     totalOut: int,
+     *     uniqueStudents: int,
+     *     smsAttention: int,
+     *     activeTurnstiles: int,
+     *     inactiveTurnstiles: int,
+     *     lastScanLabel: string
+     * }
      */
-    public function retrySms(AttendanceLog $attendanceLog): RedirectResponse
+    private function buildSummary(): array
     {
-        $attendanceLog->update(['sms_status' => 'PENDING']);
+        [$todayStart, $todayEnd] = $this->todayRange();
 
-        SendAttendanceSmsJob::dispatch($attendanceLog->id);
-
-        return back();
-    }
-
-    /**
-     * Build aggregate stats for KPI cards — fast single-query operations.
-     *
-     * @return array{currentlyTimedIn: int, totalScansToday: int, pendingSmsCount: int, failedSmsCount: int, sentSmsCount: int, activeTurnstiles: int, totalTurnstiles: int}
-     */
-    private function buildStats(): array
-    {
-        $today = Carbon::today();
-
-        $smsCounts = AttendanceLog::query()
-            ->whereDate('scanned_at', $today)
-            ->select('sms_status', DB::raw('count(*) as total'))
-            ->groupBy('sms_status')
-            ->pluck('total', 'sms_status');
-
-        $currentlyTimedIn = DB::query()
-            ->fromSub(
-                AttendanceLog::query()
-                    ->whereDate('scanned_at', $today)
-                    ->select('user_id', DB::raw('MAX(id) as latest_id'))
-                    ->groupBy('user_id'),
-                'latest_logs',
-            )
-            ->join('attendance_logs', 'attendance_logs.id', '=', 'latest_logs.latest_id')
-            ->where('attendance_logs.action', 'IN')
-            ->count();
-
-        $turnstileCounts = Turnstile::query()
-            ->select(
-                DB::raw('count(*) as total'),
-                DB::raw('sum(case when status = true then 1 else 0 end) as active'),
-            )
+        /** @var object{total_in:int|string|null,total_out:int|string|null,unique_students:int|string|null,sms_attention:int|string|null} $totals */
+        $totals = AttendanceLog::query()
+            ->whereBetween('scanned_at', [$todayStart, $todayEnd])
+            ->selectRaw("SUM(CASE WHEN action = 'IN' THEN 1 ELSE 0 END) as total_in")
+            ->selectRaw("SUM(CASE WHEN action = 'OUT' THEN 1 ELSE 0 END) as total_out")
+            ->selectRaw('COUNT(DISTINCT user_id) as unique_students')
+            ->selectRaw("SUM(CASE WHEN sms_status IN ('PENDING', 'FAILED') THEN 1 ELSE 0 END) as sms_attention")
             ->first();
 
+        $latestScan = AttendanceLog::query()
+            ->latest('scanned_at')
+            ->first(['scanned_at']);
+
         return [
-            'currentlyTimedIn' => $currentlyTimedIn,
-            'totalScansToday' => (int) $smsCounts->sum(),
-            'pendingSmsCount' => (int) ($smsCounts['PENDING'] ?? 0),
-            'failedSmsCount' => (int) ($smsCounts['FAILED'] ?? 0),
-            'sentSmsCount' => (int) ($smsCounts['SENT'] ?? 0),
-            'activeTurnstiles' => (int) ($turnstileCounts?->active ?? 0),
-            'totalTurnstiles' => (int) ($turnstileCounts?->total ?? 0),
+            'totalIn' => (int) ($totals->total_in ?? 0),
+            'totalOut' => (int) ($totals->total_out ?? 0),
+            'uniqueStudents' => (int) ($totals->unique_students ?? 0),
+            'smsAttention' => (int) ($totals->sms_attention ?? 0),
+            'activeTurnstiles' => Turnstile::query()->where('status', true)->count(),
+            'inactiveTurnstiles' => Turnstile::query()->where('status', false)->count(),
+            'lastScanLabel' => $latestScan?->scanned_at instanceof Carbon
+                ? $latestScan->scanned_at->timezone(config('app.timezone'))->format('g:i A')
+                : 'No scans yet',
         ];
     }
 
     /**
-     * Build hourly IN/OUT breakdown for today's attendance chart.
-     *
-     * @return array<int, array{hour: string, timeIn: int, timeOut: int}>
+     * @return array{
+     *     totalScans: int,
+     *     peakHourLabel: string|null,
+     *     latestScanLabel: string|null,
+     *     hasData: bool,
+     *     points: array<int, array{hour:int,label:string,shortLabel:string,scanCount:int}>
+     * }
      */
-    private function buildHourlyBreakdown(): array
+    private function buildTodayActivity(): array
     {
-        $today = Carbon::today();
+        [$todayStart, $todayEnd] = $this->todayRange();
+        $driver = DB::connection()->getDriverName();
 
-        $hourlyData = AttendanceLog::query()
-            ->whereDate('scanned_at', $today)
-            ->select(
-                DB::raw('HOUR(scanned_at) as hour_num'),
-                DB::raw("sum(case when action = 'IN' then 1 else 0 end) as time_in"),
-                DB::raw("sum(case when action = 'OUT' then 1 else 0 end) as time_out"),
-            )
-            ->groupBy('hour_num')
-            ->orderBy('hour_num')
-            ->get()
-            ->keyBy('hour_num');
+        $hourExpression = $driver === 'sqlite'
+            ? "CAST(strftime('%H', scanned_at) AS INTEGER)"
+            : 'HOUR(scanned_at)';
 
-        $breakdown = [];
+        /** @var Collection<int, object{hour_bucket:int|string, scan_count:int|string}> $rows */
+        $rows = AttendanceLog::query()
+            ->whereBetween('scanned_at', [$todayStart, $todayEnd])
+            ->selectRaw("{$hourExpression} as hour_bucket")
+            ->selectRaw('COUNT(*) as scan_count')
+            ->groupBy('hour_bucket')
+            ->orderBy('hour_bucket')
+            ->get();
 
-        for ($hour = 5; $hour <= 20; $hour++) {
-            $row = $hourlyData->get($hour);
-            $breakdown[] = [
-                'hour' => Carbon::createFromTime($hour)->format('g A'),
-                'timeIn' => (int) ($row?->time_in ?? 0),
-                'timeOut' => (int) ($row?->time_out ?? 0),
-            ];
-        }
+        $countsByHour = $rows
+            ->mapWithKeys(fn (object $row): array => [(int) $row->hour_bucket => (int) $row->scan_count]);
 
-        return $breakdown;
+        $points = collect(range(6, 19))
+            ->map(fn (int $hour): array => [
+                'hour' => $hour,
+                'label' => Carbon::createFromTime($hour)->format('g A'),
+                'shortLabel' => Carbon::createFromTime($hour)->format('g'),
+                'scanCount' => (int) ($countsByHour[$hour] ?? 0),
+            ])
+            ->values();
+
+        $totalScans = $points->sum('scanCount');
+        $peakPoint = $points
+            ->filter(fn (array $point): bool => $point['scanCount'] > 0)
+            ->sortByDesc('scanCount')
+            ->sortBy('hour')
+            ->first();
+
+        $latestScanAt = AttendanceLog::query()
+            ->whereBetween('scanned_at', [$todayStart, $todayEnd])
+            ->latest('scanned_at')
+            ->value('scanned_at');
+
+        return [
+            'totalScans' => $totalScans,
+            'peakHourLabel' => $peakPoint['label'] ?? null,
+            'latestScanLabel' => filled($latestScanAt)
+                ? Carbon::parse($latestScanAt)->timezone(config('app.timezone'))->format('g:i A')
+                : null,
+            'hasData' => $totalScans > 0,
+            'points' => $points->all(),
+        ];
     }
 
     /**
-     * Build the recent activity feed — last 20 scans.
-     *
-     * @return array<int, array{id: int, userName: string, action: string, scannedAt: string, turnstileName: string, profileImage: string|null}>
+     * @return array<int, array{
+     *     id:int,
+     *     studentName:string,
+     *     roleLabel:string,
+     *     gradeSection:string|null,
+     *     actionLabel:string,
+     *     turnstileName:string,
+     *     scannedAtLabel:string
+     * }>
      */
     private function buildRecentActivity(): array
     {
         return AttendanceLog::query()
-            ->with(['user', 'turnstile'])
+            ->with(['user.studentDetail', 'user.employeeDetail', 'turnstile'])
             ->latest('scanned_at')
-            ->take(20)
+            ->take(self::RECENT_ACTIVITY_LIMIT)
             ->get()
             ->map(function (AttendanceLog $log): array {
                 $user = $log->user;
+                $studentDetail = $user?->studentDetail;
+                $employeeDetail = $user?->employeeDetail;
 
                 return [
                     'id' => $log->id,
-                    'userName' => $user?->name ?? 'Unknown',
-                    'action' => $log->action,
-                    'scannedAt' => $log->scanned_at->toIso8601String(),
-                    'turnstileName' => $log->turnstile?->name ?? 'Unknown',
-                    'profileImage' => $this->resolveProfileImage($user?->profile_image),
+                    'studentName' => $user?->name ?? 'Unknown User',
+                    'roleLabel' => $studentDetail !== null
+                        ? 'Student'
+                        : ($employeeDetail !== null ? 'Employee' : 'Staff'),
+                    'gradeSection' => $studentDetail !== null
+                        ? trim(implode(' | ', array_filter([
+                            $studentDetail->level,
+                            $studentDetail->section,
+                        ])))
+                        : null,
+                    'actionLabel' => $log->action === 'OUT' ? 'Time Out' : 'Time In',
+                    'turnstileName' => $log->turnstile?->name ?? 'Unknown Turnstile',
+                    'scannedAtLabel' => $log->scanned_at->timezone(config('app.timezone'))->format('g:i A'),
                 ];
             })
+            ->values()
             ->all();
     }
 
     /**
-     * Build turnstile statuses using last scan as connectivity proxy.
-     *
-     * Considers a turnstile "online" if it recorded a scan within the last 5 minutes.
-     *
-     * @return array<int, array{id: int, name: string, location: string, ipAddress: string, isActive: bool, isOnline: bool, lastSeenAt: string|null}>
+     * @return array<int, array{
+     *     id:int,
+     *     name:string,
+     *     location:string,
+     *     statusLabel:string,
+     *     statusTone:'default'|'secondary'|'destructive',
+     *     todayScans:int,
+     *     lastScanLabel:string
+     * }>
      */
-    private function buildTurnstileStatuses(): array
+    private function buildTurnstileStatus(): array
     {
+        [$todayStart, $todayEnd] = $this->todayRange();
+
         return Turnstile::query()
-            ->withMax('attendanceLogs', 'scanned_at')
+            ->withCount([
+                'attendanceLogs as today_scan_count' => fn ($query) => $query
+                    ->whereBetween('scanned_at', [$todayStart, $todayEnd]),
+            ])
+            ->withMax('attendanceLogs as last_scanned_at', 'scanned_at')
+            ->orderByDesc('status')
             ->orderBy('name')
             ->get()
             ->map(function (Turnstile $turnstile): array {
-                $lastScannedAt = $turnstile->attendance_logs_max_scanned_at
-                    ? Carbon::parse($turnstile->attendance_logs_max_scanned_at)
+                $lastScannedAt = $turnstile->last_scanned_at
+                    ? Carbon::parse($turnstile->last_scanned_at)
                     : null;
 
                 return [
                     'id' => $turnstile->id,
                     'name' => $turnstile->name,
                     'location' => $turnstile->location,
-                    'ipAddress' => $turnstile->ip_address,
-                    'isActive' => (bool) $turnstile->status,
-                    'isOnline' => $lastScannedAt?->greaterThanOrEqualTo(now()->subMinutes(5)) ?? false,
-                    'lastSeenAt' => $lastScannedAt?->toIso8601String(),
+                    'statusLabel' => $turnstile->status ? 'Active' : 'Inactive',
+                    'statusTone' => $turnstile->status ? 'default' : 'destructive',
+                    'todayScans' => (int) $turnstile->today_scan_count,
+                    'lastScanLabel' => $lastScannedAt instanceof Carbon
+                        ? $lastScannedAt->timezone(config('app.timezone'))->format('g:i A')
+                        : 'No scans yet',
                 ];
             })
+            ->values()
             ->all();
     }
 
     /**
-     * Build the SMS entries list showing PENDING, SENT, and FAILED statuses.
-     *
-     * @return array<int, array{id: int, userName: string, guardianContact: string, action: string, scannedAt: string, smsStatus: string}>
+     * @return array{0: Carbon, 1: Carbon}
      */
-    private function buildSmsEntries(): array
+    private function todayRange(): array
     {
-        return AttendanceLog::query()
-            ->with(['user.studentDetail'])
-            ->whereDate('scanned_at', Carbon::today())
-            ->latest('scanned_at')
-            ->take(50)
-            ->get()
-            ->map(function (AttendanceLog $log): array {
-                $user = $log->user;
+        $today = now();
 
-                return [
-                    'id' => $log->id,
-                    'userName' => $user?->name ?? 'Unknown',
-                    'guardianContact' => $user?->studentDetail?->guardian_contact_number ?? '—',
-                    'action' => $log->action,
-                    'scannedAt' => $log->scanned_at->toIso8601String(),
-                    'smsStatus' => $log->sms_status,
-                ];
-            })
-            ->all();
-    }
-
-    /**
-     * Resolve profile image URL from storage path or external URL.
-     */
-    private function resolveProfileImage(?string $profileImage): ?string
-    {
-        if (! filled($profileImage)) {
-            return null;
-        }
-
-        if (
-            str_starts_with($profileImage, 'http://')
-            || str_starts_with($profileImage, 'https://')
-            || str_starts_with($profileImage, 'data:image/')
-            || str_starts_with($profileImage, '/storage/')
-        ) {
-            return $profileImage;
-        }
-
-        /** @var \Illuminate\Filesystem\FilesystemAdapter $disk */
-        $disk = Storage::disk('public');
-
-        return $disk->url($profileImage);
+        return [$today->copy()->startOfDay(), $today->copy()->endOfDay()];
     }
 }

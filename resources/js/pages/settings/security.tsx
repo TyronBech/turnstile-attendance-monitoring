@@ -10,6 +10,7 @@ import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 import { edit } from '@/routes/security';
 import { disable, enable } from '@/routes/two-factor';
 
@@ -26,6 +27,7 @@ export default function Security({
 }: Props) {
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
+    const { palette, rgb } = useUiTheme();
 
     const {
         qrCodeSvg,
@@ -86,7 +88,13 @@ export default function Security({
                 >
                     {({ errors, processing }) => (
                         <>
-                            <div className="grid gap-2">
+                            <div
+                                className="grid gap-2 rounded-[1.25rem] border p-5"
+                                style={{
+                                    backgroundColor: rgb(palette.secondary['50'], 0.72),
+                                    borderColor: rgb(palette.primary['100']),
+                                }}
+                            >
                                 <Label htmlFor="current_password">
                                     Current password
                                 </Label>
@@ -95,7 +103,10 @@ export default function Security({
                                     id="current_password"
                                     ref={currentPasswordInput}
                                     name="current_password"
-                                    className="mt-1 block w-full"
+                                    className="mt-1 block h-11 w-full rounded-xl"
+                                    style={{
+                                        borderColor: rgb(palette.primary['200']),
+                                    }}
                                     autoComplete="current-password"
                                     placeholder="Current password"
                                 />
@@ -103,14 +114,23 @@ export default function Security({
                                 <InputError message={errors.current_password} />
                             </div>
 
-                            <div className="grid gap-2">
+                            <div
+                                className="grid gap-2 rounded-[1.25rem] border p-5"
+                                style={{
+                                    backgroundColor: rgb(palette.secondary['50'], 0.72),
+                                    borderColor: rgb(palette.primary['100']),
+                                }}
+                            >
                                 <Label htmlFor="password">New password</Label>
 
                                 <PasswordInput
                                     id="password"
                                     ref={passwordInput}
                                     name="password"
-                                    className="mt-1 block w-full"
+                                    className="mt-1 block h-11 w-full rounded-xl"
+                                    style={{
+                                        borderColor: rgb(palette.primary['200']),
+                                    }}
                                     autoComplete="new-password"
                                     placeholder="New password"
                                 />
@@ -118,7 +138,13 @@ export default function Security({
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="grid gap-2">
+                            <div
+                                className="grid gap-2 rounded-[1.25rem] border p-5"
+                                style={{
+                                    backgroundColor: rgb(palette.secondary['50'], 0.72),
+                                    borderColor: rgb(palette.primary['100']),
+                                }}
+                            >
                                 <Label htmlFor="password_confirmation">
                                     Confirm password
                                 </Label>
@@ -126,7 +152,10 @@ export default function Security({
                                 <PasswordInput
                                     id="password_confirmation"
                                     name="password_confirmation"
-                                    className="mt-1 block w-full"
+                                    className="mt-1 block h-11 w-full rounded-xl"
+                                    style={{
+                                        borderColor: rgb(palette.primary['200']),
+                                    }}
                                     autoComplete="new-password"
                                     placeholder="Confirm password"
                                 />
@@ -140,6 +169,11 @@ export default function Security({
                                 <Button
                                     disabled={processing}
                                     data-test="update-password-button"
+                                    className="h-11 rounded-xl px-5 shadow-none"
+                                    style={{
+                                        backgroundColor: rgb(palette.primary['700']),
+                                        color: rgb(palette.secondary['50']),
+                                    }}
                                 >
                                     Save password
                                 </Button>
@@ -171,6 +205,7 @@ export default function Security({
                                             variant="destructive"
                                             type="submit"
                                             disabled={processing}
+                                            className="rounded-xl shadow-none"
                                         >
                                             Disable 2FA
                                         </Button>
@@ -197,6 +232,11 @@ export default function Security({
                                 {hasSetupData ? (
                                     <Button
                                         onClick={() => setShowSetupModal(true)}
+                                        className="rounded-xl shadow-none"
+                                        style={{
+                                            backgroundColor: rgb(palette.primary['700']),
+                                            color: rgb(palette.secondary['50']),
+                                        }}
                                     >
                                         <ShieldCheck />
                                         Continue setup
@@ -212,6 +252,11 @@ export default function Security({
                                             <Button
                                                 type="submit"
                                                 disabled={processing}
+                                                className="rounded-xl shadow-none"
+                                                style={{
+                                                    backgroundColor: rgb(palette.primary['700']),
+                                                    color: rgb(palette.secondary['50']),
+                                                }}
                                             >
                                                 Enable 2FA
                                             </Button>

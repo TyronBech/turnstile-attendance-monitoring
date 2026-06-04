@@ -30,13 +30,13 @@ test('live monitoring users can access the attendance display page', function ()
         ->assertOk();
 });
 
-test('live monitoring users cannot access dashboard or settings pages', function (string $routeName): void {
+test('live monitoring users are redirected to attendance display from dashboard or settings pages', function (string $routeName): void {
     $user = User::factory()->create();
     $user->assignRole(RoleEnum::Live_Monitoring->value);
 
     $this->actingAs($user)
         ->get(route($routeName))
-        ->assertForbidden();
+        ->assertRedirect(route('attendance-display', absolute: false));
 })->with([
     'dashboard' => 'dashboard',
     'profile settings' => 'profile.edit',
