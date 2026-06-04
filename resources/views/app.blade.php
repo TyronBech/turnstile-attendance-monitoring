@@ -11,9 +11,17 @@
             }
         </style>
 
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @php
+            $logoUrl = \App\Models\UiSetting::primary()?->getLogoDataUrl();
+        @endphp
+        @if ($logoUrl)
+            <link rel="icon" href="{{ $logoUrl }}">
+            <link rel="apple-touch-icon" href="{{ $logoUrl }}">
+        @else
+            <link rel="icon" href="/favicon.ico" sizes="any">
+            <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+            <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        @endif
 
         @fonts
 
