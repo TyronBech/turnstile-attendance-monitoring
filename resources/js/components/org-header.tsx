@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, Menu, X, GraduationCap, UserCog, LayoutGrid, Upload } from 'lucide-react';
+import { ChevronDown, Menu, X, GraduationCap, UserCog, LayoutGrid, Upload, Settings, Users } from 'lucide-react';
 import { useState } from 'react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -16,6 +16,7 @@ import { useUiTheme } from '@/hooks/use-ui-theme';
 import { cn, toUrl } from '@/lib/utils';
 import { dashboard, login } from '@/routes';
 import imports from '@/routes/imports';
+import userMaintenance from '@/routes/user-maintenance';
 import type { BreadcrumbItem } from '@/types';
 
 interface OrgHeaderProps {
@@ -140,6 +141,37 @@ export function OrgHeader({
                                     >
                                         <UserCog className="size-4.5 text-slate-500 dark:text-zinc-400" />
                                         Faculties & Staffs
+                                    </Link>
+                                </div>
+                            </div>
+
+                            <div className="relative group h-full flex items-center">
+                                <button
+                                    type="button"
+                                    className={cn(
+                                        "flex items-center gap-1.5 text-sm font-medium transition-all pb-1.5 border-b-2 cursor-pointer mt-1.5",
+                                        isCurrentOrParentUrl('/user-maintenance')
+                                            ? "text-white border-white font-semibold"
+                                            : "text-white/80 border-transparent hover:text-white hover:border-white/40"
+                                    )}
+                                >
+                                    <Settings className="size-4" />
+                                    Maintenance
+                                    <ChevronDown className="size-3.5 opacity-70 transition-transform group-hover:rotate-180" />
+                                </button>
+                                {/* Dropdown Menu */}
+                                <div className="absolute left-0 top-full mt-1 w-52 rounded-xl shadow-xl bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 py-1.5 scale-95 group-hover:scale-100 origin-top-left before:absolute before:-top-2 before:left-0 before:right-0 before:h-2 before:content-['']">
+                                    <Link
+                                        href={toUrl(userMaintenance.users.index())}
+                                        className={cn(
+                                            "flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors",
+                                            isCurrentUrl(userMaintenance.users.index())
+                                                ? "bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-semibold"
+                                                : "text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800/50"
+                                        )}
+                                    >
+                                        <Users className="size-4.5 text-slate-500 dark:text-zinc-400" />
+                                        Users
                                     </Link>
                                 </div>
                             </div>
@@ -273,6 +305,25 @@ export function OrgHeader({
                             >
                                 <UserCog className="size-4" />
                                 Faculties & Staffs
+                            </Link>
+                        </div>
+
+                        <div className="flex flex-col gap-1 pl-3 border-l border-white/15">
+                            <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-white/40 uppercase">
+                                Maintenance
+                            </span>
+                            <Link
+                                href={toUrl(userMaintenance.users.index())}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={cn(
+                                    "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors",
+                                    isCurrentUrl(userMaintenance.users.index())
+                                        ? "bg-white/15 text-white font-semibold"
+                                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                                )}
+                            >
+                                <Users className="size-4" />
+                                Users
                             </Link>
                         </div>
                     </div>
