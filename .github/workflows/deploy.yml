@@ -99,6 +99,7 @@ jobs:
               exit 1
             fi
             composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+            php artisan migrate --force --no-interaction
             php artisan optimize:clear --except=cache --no-interaction
             php artisan config:cache
             php artisan route:cache
