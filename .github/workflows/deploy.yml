@@ -40,6 +40,20 @@ jobs:
           test -f public/build/manifest.json
           ls -la public/build
 
+      - name: Check Hostinger SSH connectivity
+        env:
+          DEPLOY_HOST: ${{ secrets.HOSTINGER_HOST }}
+          DEPLOY_PORT: ${{ secrets.HOSTINGER_PORT }}
+        run: |
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_PORT" ]; then
+            echo "HOSTINGER_HOST and HOSTINGER_PORT secrets must both be configured."
+            exit 1
+          fi
+          timeout 30 bash -c "</dev/tcp/$DEPLOY_HOST/$DEPLOY_PORT" || {
+            echo "Unable to connect to Hostinger over SSH. Check HOSTINGER_HOST, HOSTINGER_PORT, and whether SSH access is enabled for this hosting account."
+            exit 1
+          }
+
       - name: Upload application files
         uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634
         with:
@@ -47,6 +61,8 @@ jobs:
           username: ${{ secrets.HOSTINGER_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
+          timeout: 120s
+          command_timeout: 10m
           source: "app,bootstrap,config,database,public,public/build,resources,routes,artisan,composer.json,composer.lock"
           target: ${{ secrets.HOSTINGER_PATH }}
           rm: false
@@ -60,6 +76,8 @@ jobs:
           username: ${{ secrets.HOSTINGER_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
+          timeout: 120s
+          command_timeout: 10m
           script_stop: true
           script: |
             cd "${{ secrets.HOSTINGER_PATH }}"
