@@ -6,7 +6,6 @@ use App\Enums\Role as RoleEnum;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
-use Laravel\Fortify\Fortify;
 
 class TwoFactorLoginResponse implements TwoFactorLoginResponseContract
 {
@@ -15,12 +14,12 @@ class TwoFactorLoginResponse implements TwoFactorLoginResponseContract
      */
     public function toResponse($request): JsonResponse|RedirectResponse
     {
-        $redirectPath = $request->user()?->hasRole(RoleEnum::Live_Monitoring->value)
-            ? route('attendance-display', absolute: false)
-            : Fortify::redirects('login');
+        $isLiveMonitoringUser = $request->user()?->hasRole(RoleEnum::Live_Monitoring->value) === true;
 
         return $request->wantsJson()
             ? new JsonResponse('', 204)
-            : redirect()->intended($redirectPath);
+            : ($isLiveMonitoringUser
+                ? redirect()->intended(route('attendance-display', absolute: false))
+                : redirect()->route('dashboard'));
     }
 }
