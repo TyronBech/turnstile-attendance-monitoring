@@ -10,6 +10,15 @@ test('login screen can be rendered', function () {
     $response->assertOk();
 });
 
+test('login screen ignores appearance cookies and stays in light mode', function (): void {
+    $response = $this->withUnencryptedCookies(['appearance' => 'dark'])->get(route('login'));
+
+    $response
+        ->assertOk()
+        ->assertDontSee('<html lang="en" class="dark">', false)
+        ->assertDontSee('matchMedia(\'(prefers-color-scheme: dark)\')', false);
+});
+
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 

@@ -3,6 +3,7 @@ import { OrgFooter } from '@/components/org-footer';
 import { OrgHeader } from '@/components/org-header';
 import { useUiTheme } from '@/hooks/use-ui-theme';
 import type { AuthLayoutProps } from '@/types';
+import type { CSSProperties } from 'react';
 
 export default function AuthSimpleLayout({
     children,
@@ -11,6 +12,15 @@ export default function AuthSimpleLayout({
 }: AuthLayoutProps) {
     const { theme, palette, rgb, orgName } = useUiTheme();
     const primary700 = rgb(palette.primary['700']);
+    const panelForeground = rgb(palette.primary['900']);
+    const panelMutedForeground = rgb(palette.secondary['900']);
+    const panelThemeVariables = {
+        color: panelForeground,
+        '--foreground': panelForeground,
+        '--card-foreground': panelForeground,
+        '--popover-foreground': panelForeground,
+        '--muted-foreground': panelMutedForeground,
+    } as CSSProperties;
 
     return (
         <div
@@ -65,14 +75,27 @@ export default function AuthSimpleLayout({
                             </p>
                         </div>
 
-                        <div className="px-8 py-8">
+                        <div
+                            className="px-8 py-8"
+                            style={panelThemeVariables}
+                        >
                             {children}
                         </div>
                     </div>
                 </div>
             </main>
 
-            <OrgFooter maxWidth="max-w-5xl" />
+            <OrgFooter
+                maxWidth="max-w-5xl"
+                secondaryContent={
+                    <p>
+                        Powered by{' '}
+                        <span className="font-semibold text-white">
+                            PopQuery
+                        </span>
+                    </p>
+                }
+            />
         </div>
     );
 }
