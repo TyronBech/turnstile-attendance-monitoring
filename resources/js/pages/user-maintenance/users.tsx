@@ -204,7 +204,7 @@ export default function UsersIndex({
 
     return (
         <>
-            <Head title="Maintenance — Users" />
+            <Head title="User Maintenance" />
 
             <div className="px-6 py-10 md:px-10">
                 <div className="space-y-6">

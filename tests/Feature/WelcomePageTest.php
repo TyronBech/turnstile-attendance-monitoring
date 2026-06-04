@@ -16,6 +16,8 @@ test('welcome page uses the vite-managed popquery logo asset', function (): void
 
     expect($welcomePage)
         ->toContain("import popQueryLogo from '../../../public/PopQuery-Logo.svg';")
-        ->toContain('<img src={popQueryLogo} alt="PopQuery" className="h-11 w-auto" />')
+        ->toContain('src={popQueryLogo}')
+        ->toContain('alt="PopQuery"')
+        ->toContain('className="h-11 w-auto"')
         ->not->toContain('src="/PopQuery-Logo.svg"');
 });

@@ -10,7 +10,13 @@ import {
 } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUiTheme } from '@/hooks/use-ui-theme';
 
@@ -73,7 +79,10 @@ function DashboardLoadingRows() {
     return (
         <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="grid grid-cols-[1.4fr_1fr_1fr] gap-3">
+                <div
+                    key={index}
+                    className="grid grid-cols-[1.4fr_1fr_1fr] gap-3"
+                >
                     <Skeleton className="h-12" />
                     <Skeleton className="h-12" />
                     <Skeleton className="h-12" />
@@ -100,11 +109,21 @@ export default function Dashboard({
     recentActivity,
     turnstileStatus,
 }: DashboardProps) {
-    usePoll(20000, {
-        only: ['summary', 'generatedAt', 'todayActivity', 'recentActivity', 'turnstileStatus'],
-    }, {
-        keepAlive: true,
-    });
+    usePoll(
+        20000,
+        {
+            only: [
+                'summary',
+                'generatedAt',
+                'todayActivity',
+                'recentActivity',
+                'turnstileStatus',
+            ],
+        },
+        {
+            keepAlive: true,
+        },
+    );
     const { theme, palette, rgb, orgInitial, orgName } = useUiTheme();
 
     const kpiCards = [
@@ -135,24 +154,14 @@ export default function Dashboard({
     ];
 
     const activityPoints = todayActivity?.points ?? [];
-    const peakHourlyCount = Math.max(...activityPoints.map((point) => point.scanCount), 1);
-    const themedCardClassName = 'border bg-transparent shadow-none';
-    const sectionSurfaceStyle = {
-        backgroundColor: 'transparent',
-        borderColor: rgb(palette.primary['200'], 0.95),
-        color: rgb(palette.primary['800']),
-    } satisfies CSSProperties;
-    const mutedSurfaceStyle = {
-        backgroundColor: 'transparent',
-        borderColor: rgb(palette.primary['200'], 0.82),
-        color: rgb(palette.primary['800']),
-    } satisfies CSSProperties;
-    const descriptionStyle = {
-        color: rgb(palette.primary['500']),
-    } satisfies CSSProperties;
-    const titleStyle = {
-        color: rgb(palette.primary['800']),
-    } satisfies CSSProperties;
+    const peakHourlyCount = Math.max(
+        ...activityPoints.map((point) => point.scanCount),
+        1,
+    );
+    const themedCardClassName =
+        'border-border bg-card text-card-foreground shadow-sm';
+    const mutedSurfaceClassName =
+        'rounded-2xl border border-border bg-background/40 text-card-foreground';
     const shellStyle = {
         '--dashboard-primary-50': palette.primary['50'],
         '--dashboard-primary-100': palette.primary['100'],
@@ -166,7 +175,10 @@ export default function Dashboard({
     return (
         <>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4" style={shellStyle}>
+            <div
+                className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4"
+                style={shellStyle}
+            >
                 <section
                     className="overflow-hidden rounded-[1.75rem] border"
                     style={{
@@ -180,8 +192,14 @@ export default function Dashboard({
                             <div
                                 className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.35rem] border"
                                 style={{
-                                    backgroundColor: rgb(palette.secondary['50'], 0.08),
-                                    borderColor: rgb(palette.secondary['50'], 0.22),
+                                    backgroundColor: rgb(
+                                        palette.secondary['50'],
+                                        0.08,
+                                    ),
+                                    borderColor: rgb(
+                                        palette.secondary['50'],
+                                        0.22,
+                                    ),
                                 }}
                             >
                                 {theme.logoUrl ? (
@@ -191,18 +209,23 @@ export default function Dashboard({
                                         className="h-10 w-10 object-contain"
                                     />
                                 ) : (
-                                    <span className="text-xl font-black tracking-tight text-white">{orgInitial}</span>
+                                    <span className="text-xl font-black tracking-tight text-white">
+                                        {orgInitial}
+                                    </span>
                                 )}
                             </div>
 
                             <div className="space-y-2">
-                                <p className="text-xs font-semibold tracking-[0.34em] uppercase text-white/68">
+                                <p className="text-xs font-semibold tracking-[0.34em] text-white/68 uppercase">
                                     {orgInitial}
                                 </p>
                                 <div>
-                                    <h1 className="text-2xl font-black tracking-tight text-white md:text-3xl">{orgName}</h1>
+                                    <h1 className="text-2xl font-black tracking-tight text-white md:text-3xl">
+                                        {orgName}
+                                    </h1>
                                     <p className="mt-1 text-sm text-white/78 md:text-base">
-                                        Attendance dashboard for quick operational review and monitoring.
+                                        Attendance dashboard for quick
+                                        operational review and monitoring.
                                     </p>
                                 </div>
                             </div>
@@ -212,26 +235,42 @@ export default function Dashboard({
                             <div
                                 className="rounded-2xl border px-4 py-3"
                                 style={{
-                                    backgroundColor: rgb(palette.secondary['50'], 0.08),
-                                    borderColor: rgb(palette.secondary['50'], 0.22),
+                                    backgroundColor: rgb(
+                                        palette.secondary['50'],
+                                        0.08,
+                                    ),
+                                    borderColor: rgb(
+                                        palette.secondary['50'],
+                                        0.22,
+                                    ),
                                 }}
                             >
-                                <p className="text-xs font-semibold tracking-[0.22em] uppercase text-white/64">
+                                <p className="text-xs font-semibold tracking-[0.22em] text-white/64 uppercase">
                                     Last Scan
                                 </p>
-                                <p className="mt-2 text-2xl font-black tabular-nums text-white">{summary.lastScanLabel}</p>
+                                <p className="mt-2 text-2xl font-black text-white tabular-nums">
+                                    {summary.lastScanLabel}
+                                </p>
                             </div>
                             <div
                                 className="rounded-2xl border px-4 py-3"
                                 style={{
-                                    backgroundColor: rgb(palette.secondary['50'], 0.08),
-                                    borderColor: rgb(palette.secondary['50'], 0.22),
+                                    backgroundColor: rgb(
+                                        palette.secondary['50'],
+                                        0.08,
+                                    ),
+                                    borderColor: rgb(
+                                        palette.secondary['50'],
+                                        0.22,
+                                    ),
                                 }}
                             >
-                                <p className="text-xs font-semibold tracking-[0.22em] uppercase text-white/72">
+                                <p className="text-xs font-semibold tracking-[0.22em] text-white/72 uppercase">
                                     Active Devices
                                 </p>
-                                <p className="mt-2 text-2xl font-black tabular-nums text-white">{summary.activeTurnstiles}</p>
+                                <p className="mt-2 text-2xl font-black text-white tabular-nums">
+                                    {summary.activeTurnstiles}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -242,19 +281,30 @@ export default function Dashboard({
                         const Icon = card.icon;
 
                         return (
-                            <Card key={card.title} className={themedCardClassName} style={sectionSurfaceStyle}>
+                            <Card
+                                key={card.title}
+                                className={themedCardClassName}
+                            >
                                 <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
                                     <div>
-                                        <CardDescription style={descriptionStyle}>{card.title}</CardDescription>
-                                        <CardTitle className="mt-2 text-3xl font-black tracking-tight" style={titleStyle}>
+                                        <CardDescription>
+                                            {card.title}
+                                        </CardDescription>
+                                        <CardTitle className="mt-2 text-3xl font-black tracking-tight">
                                             {numberFormatter.format(card.value)}
                                         </CardTitle>
                                     </div>
                                     <div
                                         className="rounded-xl border p-2.5"
                                         style={{
-                                            backgroundColor: rgb(palette.primary['50'], 0.94),
-                                            borderColor: rgb(palette.primary['200'], 0.9),
+                                            backgroundColor: rgb(
+                                                palette.primary['50'],
+                                                0.94,
+                                            ),
+                                            borderColor: rgb(
+                                                palette.primary['200'],
+                                                0.9,
+                                            ),
                                             color: rgb(palette.primary['700']),
                                         }}
                                     >
@@ -262,7 +312,9 @@ export default function Dashboard({
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-sm" style={descriptionStyle}>{card.description}</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {card.description}
+                                    </p>
                                 </CardContent>
                             </Card>
                         );
@@ -273,42 +325,70 @@ export default function Dashboard({
                     <Deferred
                         data="todayActivity"
                         fallback={
-                            <Card className={themedCardClassName} style={sectionSurfaceStyle}>
+                            <Card className={themedCardClassName}>
                                 <CardHeader>
-                                    <CardDescription style={descriptionStyle}>Today&apos;s Activity</CardDescription>
-                                    <CardTitle style={titleStyle}>Current Day Scan Trend</CardTitle>
+                                    <CardDescription>
+                                        Today&apos;s Activity
+                                    </CardDescription>
+                                    <CardTitle>
+                                        Current Day Scan Trend
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-5">
                                     <div className="grid gap-3 sm:grid-cols-3">
-                                        {Array.from({ length: 3 }).map((_, index) => (
-                                            <Skeleton key={index} className="h-16" />
-                                        ))}
+                                        {Array.from({ length: 3 }).map(
+                                            (_, index) => (
+                                                <Skeleton
+                                                    key={index}
+                                                    className="h-16"
+                                                />
+                                            ),
+                                        )}
                                     </div>
                                     <div className="flex h-44 items-end gap-2">
-                                        {Array.from({ length: 14 }).map((_, index) => (
-                                            <Skeleton key={index} className="w-full" style={{ height: `${40 + ((index % 5) * 16)}px` }} />
-                                        ))}
+                                        {Array.from({ length: 14 }).map(
+                                            (_, index) => (
+                                                <Skeleton
+                                                    key={index}
+                                                    className="w-full"
+                                                    style={{
+                                                        height: `${40 + (index % 5) * 16}px`,
+                                                    }}
+                                                />
+                                            ),
+                                        )}
                                     </div>
                                     <div className="grid grid-cols-4 gap-2">
-                                        {Array.from({ length: 4 }).map((_, index) => (
-                                            <Skeleton key={index} className="h-4" />
-                                        ))}
+                                        {Array.from({ length: 4 }).map(
+                                            (_, index) => (
+                                                <Skeleton
+                                                    key={index}
+                                                    className="h-4"
+                                                />
+                                            ),
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>
                         }
                     >
-                        <Card className={themedCardClassName} style={sectionSurfaceStyle}>
+                        <Card className={themedCardClassName}>
                             <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                 <div>
-                                    <CardDescription style={descriptionStyle}>Today&apos;s Activity</CardDescription>
-                                    <CardTitle style={titleStyle}>Current Day Scan Trend</CardTitle>
+                                    <CardDescription>
+                                        Today&apos;s Activity
+                                    </CardDescription>
+                                    <CardTitle>
+                                        Current Day Scan Trend
+                                    </CardTitle>
                                 </div>
                                 <Badge
                                     variant="secondary"
                                     className="gap-1.5 border-0"
                                     style={{
-                                        backgroundColor: rgb(palette.primary['100']),
+                                        backgroundColor: rgb(
+                                            palette.primary['100'],
+                                        ),
                                         color: rgb(palette.primary['700']),
                                     }}
                                 >
@@ -318,28 +398,38 @@ export default function Dashboard({
                             </CardHeader>
                             <CardContent className="space-y-5">
                                 <div className="grid gap-3 sm:grid-cols-3">
-                                    <div className="rounded-2xl border px-4 py-3" style={mutedSurfaceStyle}>
-                                        <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={descriptionStyle}>
+                                    <div
+                                        className={`${mutedSurfaceClassName} px-4 py-3`}
+                                    >
+                                        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                                             Total
                                         </p>
-                                        <p className="mt-2 text-2xl font-black tabular-nums" style={titleStyle}>
-                                            {numberFormatter.format(todayActivity?.totalScans ?? 0)}
+                                        <p className="mt-2 text-2xl font-black tabular-nums">
+                                            {numberFormatter.format(
+                                                todayActivity?.totalScans ?? 0,
+                                            )}
                                         </p>
                                     </div>
-                                    <div className="rounded-2xl border px-4 py-3" style={mutedSurfaceStyle}>
-                                        <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={descriptionStyle}>
+                                    <div
+                                        className={`${mutedSurfaceClassName} px-4 py-3`}
+                                    >
+                                        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                                             Peak Hour
                                         </p>
-                                        <p className="mt-2 text-2xl font-black tabular-nums" style={titleStyle}>
-                                            {todayActivity?.peakHourLabel ?? '--'}
+                                        <p className="mt-2 text-2xl font-black tabular-nums">
+                                            {todayActivity?.peakHourLabel ??
+                                                '--'}
                                         </p>
                                     </div>
-                                    <div className="rounded-2xl border px-4 py-3" style={mutedSurfaceStyle}>
-                                        <p className="text-xs font-semibold uppercase tracking-[0.18em]" style={descriptionStyle}>
+                                    <div
+                                        className={`${mutedSurfaceClassName} px-4 py-3`}
+                                    >
+                                        <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                                             Last Scan
                                         </p>
-                                        <p className="mt-2 text-2xl font-black tabular-nums" style={titleStyle}>
-                                            {todayActivity?.latestScanLabel ?? '--'}
+                                        <p className="mt-2 text-2xl font-black tabular-nums">
+                                            {todayActivity?.latestScanLabel ??
+                                                '--'}
                                         </p>
                                     </div>
                                 </div>
@@ -348,7 +438,10 @@ export default function Dashboard({
                                     <>
                                         <div className="flex h-48 items-end gap-2">
                                             {activityPoints.map((point) => (
-                                                <div key={point.hour} className="flex min-w-0 flex-1 flex-col items-center gap-2">
+                                                <div
+                                                    key={point.hour}
+                                                    className="flex min-w-0 flex-1 flex-col items-center gap-2"
+                                                >
                                                     <div className="flex h-40 w-full items-end">
                                                         <div
                                                             className="w-full rounded-t-[0.9rem] transition-[height]"
@@ -360,38 +453,53 @@ export default function Dashboard({
                                                             title={`${point.label}: ${point.scanCount} scans`}
                                                         />
                                                     </div>
-                                                    <div className="text-xs font-semibold tabular-nums" style={titleStyle}>
+                                                    <div className="text-xs font-semibold tabular-nums">
                                                         {point.scanCount}
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
 
-                                        <div className="grid grid-cols-4 gap-2 text-center text-xs font-semibold tracking-[0.18em] uppercase" style={descriptionStyle}>
+                                        <div className="grid grid-cols-4 gap-2 text-center text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                                             {activityPoints
-                                                .filter((point, index) => index === 0 || index === 3 || index === 6 || index === 12)
+                                                .filter(
+                                                    (point, index) =>
+                                                        index === 0 ||
+                                                        index === 3 ||
+                                                        index === 6 ||
+                                                        index === 12,
+                                                )
                                                 .map((point) => (
-                                                    <div key={`tick-${point.hour}`}>{point.label}</div>
+                                                    <div
+                                                        key={`tick-${point.hour}`}
+                                                    >
+                                                        {point.label}
+                                                    </div>
                                                 ))}
                                         </div>
                                     </>
                                 ) : (
-                                    <div
-                                        className="flex min-h-52 flex-col items-center justify-center rounded-[1.5rem] border px-6 py-10 text-center"
-                                        style={mutedSurfaceStyle}
-                                    >
+                                    <div className="flex min-h-52 flex-col items-center justify-center rounded-[1.5rem] border border-border bg-background/40 px-6 py-10 text-center text-card-foreground">
                                         <div
                                             className="flex h-14 w-14 items-center justify-center rounded-full"
                                             style={{
-                                                backgroundColor: rgb(palette.primary['100']),
-                                                color: rgb(palette.primary['700']),
+                                                backgroundColor: rgb(
+                                                    palette.primary['100'],
+                                                ),
+                                                color: rgb(
+                                                    palette.primary['700'],
+                                                ),
                                             }}
                                         >
                                             <Activity className="size-6" />
                                         </div>
-                                        <p className="mt-4 text-lg font-bold" style={titleStyle}>No scans recorded today</p>
-                                        <p className="mt-2 max-w-md text-sm" style={descriptionStyle}>
-                                            This chart refreshes for the current day only and will populate once attendance scans are logged.
+                                        <p className="mt-4 text-lg font-bold">
+                                            No scans recorded today
+                                        </p>
+                                        <p className="mt-2 max-w-md text-sm text-muted-foreground">
+                                            This chart refreshes for the current
+                                            day only and will populate once
+                                            attendance scans are logged.
                                         </p>
                                     </div>
                                 )}
@@ -402,10 +510,12 @@ export default function Dashboard({
                     <Deferred
                         data="turnstileStatus"
                         fallback={
-                            <Card className={themedCardClassName} style={sectionSurfaceStyle}>
+                            <Card className={themedCardClassName}>
                                 <CardHeader>
-                                    <CardDescription style={descriptionStyle}>Device Health</CardDescription>
-                                    <CardTitle style={titleStyle}>Turnstile Status</CardTitle>
+                                    <CardDescription>
+                                        Device Health
+                                    </CardDescription>
+                                    <CardTitle>Turnstile Status</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <DashboardLoadingList />
@@ -413,40 +523,70 @@ export default function Dashboard({
                             </Card>
                         }
                     >
-                        <Card className={themedCardClassName} style={sectionSurfaceStyle}>
+                        <Card className={themedCardClassName}>
                             <CardHeader>
-                                <CardDescription style={descriptionStyle}>Device Health</CardDescription>
-                                <CardTitle style={titleStyle}>Turnstile Status</CardTitle>
+                                <CardDescription>Device Health</CardDescription>
+                                <CardTitle>Turnstile Status</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 {(turnstileStatus ?? []).map((turnstile) => (
                                     <div
                                         key={turnstile.id}
-                                        className="flex items-start justify-between gap-3 rounded-xl border p-4"
-                                        style={mutedSurfaceStyle}
+                                        className="flex items-start justify-between gap-3 rounded-xl border border-border bg-background/40 p-4 text-card-foreground"
                                     >
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2">
-                                                <p className="font-semibold">{turnstile.name}</p>
+                                                <p className="font-semibold">
+                                                    {turnstile.name}
+                                                </p>
                                                 <Badge
-                                                    variant={turnstile.statusTone}
-                                                    style={turnstile.statusTone === 'destructive'
-                                                        ? undefined
-                                                        : {
-                                                            backgroundColor: rgb(palette.primary['100']),
-                                                            color: rgb(palette.primary['700']),
-                                                            borderColor: rgb(palette.primary['200']),
-                                                        }}
+                                                    variant={
+                                                        turnstile.statusTone
+                                                    }
+                                                    style={
+                                                        turnstile.statusTone ===
+                                                        'destructive'
+                                                            ? undefined
+                                                            : {
+                                                                  backgroundColor:
+                                                                      rgb(
+                                                                          palette
+                                                                              .primary[
+                                                                              '100'
+                                                                          ],
+                                                                      ),
+                                                                  color: rgb(
+                                                                      palette
+                                                                          .primary[
+                                                                          '700'
+                                                                      ],
+                                                                  ),
+                                                                  borderColor:
+                                                                      rgb(
+                                                                          palette
+                                                                              .primary[
+                                                                              '200'
+                                                                          ],
+                                                                      ),
+                                                              }
+                                                    }
                                                 >
                                                     {turnstile.statusLabel}
                                                 </Badge>
                                             </div>
-                                            <p className="text-sm" style={descriptionStyle}>{turnstile.location}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {turnstile.location}
+                                            </p>
                                         </div>
 
                                         <div className="text-right text-sm">
-                                            <p className="font-semibold tabular-nums">{turnstile.todayScans} scans</p>
-                                            <p style={descriptionStyle}>Last scan {turnstile.lastScanLabel}</p>
+                                            <p className="font-semibold tabular-nums">
+                                                {turnstile.todayScans} scans
+                                            </p>
+                                            <p className="text-muted-foreground">
+                                                Last scan{' '}
+                                                {turnstile.lastScanLabel}
+                                            </p>
                                         </div>
                                     </div>
                                 ))}
@@ -458,28 +598,35 @@ export default function Dashboard({
                 <Deferred
                     data="recentActivity"
                     fallback={
-                        <Card className={themedCardClassName} style={sectionSurfaceStyle}>
+                        <Card className={themedCardClassName}>
                             <CardHeader>
-                                <CardDescription style={descriptionStyle}>Latest Attendance Records</CardDescription>
-                                <CardTitle style={titleStyle}>Recent Activity</CardTitle>
+                                <CardDescription>
+                                    Latest Attendance Records
+                                </CardDescription>
+                                <CardTitle>Recent Activity</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <DashboardLoadingRows />
                             </CardContent>
                         </Card>
-                        }
-                    >
-                    <Card className={themedCardClassName} style={sectionSurfaceStyle}>
+                    }
+                >
+                    <Card className={themedCardClassName}>
                         <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                <div>
-                                    <CardDescription style={descriptionStyle}>Latest Attendance Records</CardDescription>
-                                    <CardTitle style={titleStyle}>Recent Activity</CardTitle>
-                                </div>
+                            <div>
+                                <CardDescription>
+                                    Latest Attendance Records
+                                </CardDescription>
+                                <CardTitle>Recent Activity</CardTitle>
+                            </div>
                             <Badge
                                 variant="outline"
                                 className="gap-1.5"
                                 style={{
-                                    backgroundColor: rgb(palette.secondary['50'], 0.55),
+                                    backgroundColor: rgb(
+                                        palette.secondary['50'],
+                                        0.55,
+                                    ),
                                     borderColor: rgb(palette.primary['200']),
                                     color: rgb(palette.primary['700']),
                                 }}
@@ -491,57 +638,128 @@ export default function Dashboard({
                         <CardContent>
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-[42rem] text-sm">
-                                    <thead className="text-left text-xs uppercase tracking-[0.18em]" style={descriptionStyle}>
-                                        <tr className="border-b" style={{ borderColor: rgb(palette.primary['100']) }}>
-                                            <th className="px-3 py-3 font-semibold">Name</th>
-                                            <th className="px-3 py-3 font-semibold">Context</th>
-                                            <th className="px-3 py-3 font-semibold">Action</th>
-                                            <th className="px-3 py-3 font-semibold">Turnstile</th>
-                                            <th className="px-3 py-3 font-semibold">Time</th>
+                                    <thead className="text-left text-xs tracking-[0.18em] text-muted-foreground uppercase">
+                                        <tr className="border-b border-border">
+                                            <th className="px-3 py-3 font-semibold">
+                                                Name
+                                            </th>
+                                            <th className="px-3 py-3 font-semibold">
+                                                Context
+                                            </th>
+                                            <th className="px-3 py-3 font-semibold">
+                                                Action
+                                            </th>
+                                            <th className="px-3 py-3 font-semibold">
+                                                Turnstile
+                                            </th>
+                                            <th className="px-3 py-3 font-semibold">
+                                                Time
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {(recentActivity ?? []).map((activityItem) => (
-                                            <tr
-                                                key={activityItem.id}
-                                                className="border-b last:border-b-0"
-                                                style={{ borderColor: rgb(palette.primary['100']) }}
-                                            >
-                                                <td className="px-3 py-3">
-                                                    <div className="font-semibold">{activityItem.studentName}</div>
-                                                    <div style={descriptionStyle}>{activityItem.roleLabel}</div>
-                                                </td>
-                                                <td className="px-3 py-3" style={descriptionStyle}>
-                                                    {activityItem.gradeSection ?? 'General access'}
-                                                </td>
-                                                <td className="px-3 py-3">
-                                                    <Badge
-                                                        variant={
-                                                            activityItem.actionLabel === 'Time Out'
-                                                                ? 'outline'
-                                                                : 'secondary'
-                                                        }
-                                                        className="gap-1.5"
-                                                        style={activityItem.actionLabel === 'Time Out'
-                                                            ? {
-                                                                backgroundColor: rgb(palette.secondary['50'], 0.55),
-                                                                borderColor: rgb(palette.primary['200']),
-                                                                color: rgb(palette.primary['700']),
+                                        {(recentActivity ?? []).map(
+                                            (activityItem) => (
+                                                <tr
+                                                    key={activityItem.id}
+                                                    className="border-b border-border last:border-b-0"
+                                                >
+                                                    <td className="px-3 py-3">
+                                                        <div className="font-semibold">
+                                                            {
+                                                                activityItem.studentName
                                                             }
-                                                            : {
-                                                                backgroundColor: rgb(palette.tertiary['500'], 0.18),
-                                                                color: rgb(palette.primary['800']),
-                                                                borderColor: rgb(palette.tertiary['500'], 0.28),
-                                                            }}
-                                                    >
-                                                        <ScanLine className="size-3.5" />
-                                                        {activityItem.actionLabel}
-                                                    </Badge>
-                                                </td>
-                                                <td className="px-3 py-3" style={descriptionStyle}>{activityItem.turnstileName}</td>
-                                                <td className="px-3 py-3 font-semibold tabular-nums">{activityItem.scannedAtLabel}</td>
-                                            </tr>
-                                        ))}
+                                                        </div>
+                                                        <div className="text-muted-foreground">
+                                                            {
+                                                                activityItem.roleLabel
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-3 py-3 text-muted-foreground">
+                                                        {activityItem.gradeSection ??
+                                                            'General access'}
+                                                    </td>
+                                                    <td className="px-3 py-3">
+                                                        <Badge
+                                                            variant={
+                                                                activityItem.actionLabel ===
+                                                                'Time Out'
+                                                                    ? 'outline'
+                                                                    : 'secondary'
+                                                            }
+                                                            className="gap-1.5"
+                                                            style={
+                                                                activityItem.actionLabel ===
+                                                                'Time Out'
+                                                                    ? {
+                                                                          backgroundColor:
+                                                                              rgb(
+                                                                                  palette
+                                                                                      .secondary[
+                                                                                      '50'
+                                                                                  ],
+                                                                                  0.55,
+                                                                              ),
+                                                                          borderColor:
+                                                                              rgb(
+                                                                                  palette
+                                                                                      .primary[
+                                                                                      '200'
+                                                                                  ],
+                                                                              ),
+                                                                          color: rgb(
+                                                                              palette
+                                                                                  .primary[
+                                                                                  '700'
+                                                                              ],
+                                                                          ),
+                                                                      }
+                                                                    : {
+                                                                          backgroundColor:
+                                                                              rgb(
+                                                                                  palette
+                                                                                      .tertiary[
+                                                                                      '500'
+                                                                                  ],
+                                                                                  0.18,
+                                                                              ),
+                                                                          color: rgb(
+                                                                              palette
+                                                                                  .primary[
+                                                                                  '800'
+                                                                              ],
+                                                                          ),
+                                                                          borderColor:
+                                                                              rgb(
+                                                                                  palette
+                                                                                      .tertiary[
+                                                                                      '500'
+                                                                                  ],
+                                                                                  0.28,
+                                                                              ),
+                                                                      }
+                                                            }
+                                                        >
+                                                            <ScanLine className="size-3.5" />
+                                                            {
+                                                                activityItem.actionLabel
+                                                            }
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="px-3 py-3 text-muted-foreground">
+                                                        {
+                                                            activityItem.turnstileName
+                                                        }
+                                                    </td>
+                                                    <td className="px-3 py-3 font-semibold tabular-nums">
+                                                        {
+                                                            activityItem.scannedAtLabel
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            ),
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
