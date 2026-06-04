@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { useUiTheme } from '@/hooks/use-ui-theme';
 import { SidebarInset } from '@/components/ui/sidebar';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 import type { AppVariant } from '@/types';
 
 type Props = React.ComponentProps<'main'> & {

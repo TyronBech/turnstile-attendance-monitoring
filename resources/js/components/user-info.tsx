@@ -1,6 +1,6 @@
-import { useUiTheme } from '@/hooks/use-ui-theme';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useInitials } from '@/hooks/use-initials';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 import type { User } from '@/types';
 
 export function UserInfo({

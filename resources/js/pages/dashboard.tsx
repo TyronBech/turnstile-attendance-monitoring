@@ -11,9 +11,8 @@ import {
 import type { CSSProperties } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useUiTheme } from '@/hooks/use-ui-theme';
 import { Skeleton } from '@/components/ui/skeleton';
-import { dashboard } from '@/routes';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 
 type DashboardSummary = {
     totalIn: number;

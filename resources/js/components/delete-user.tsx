@@ -14,8 +14,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { useUiTheme } from '@/hooks/use-ui-theme';
 import { Label } from '@/components/ui/label';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 
 export default function DeleteUser() {
     const passwordInput = useRef<HTMLInputElement>(null);

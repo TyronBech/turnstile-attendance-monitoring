@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import type { CSSProperties, ReactNode } from 'react';
-import { useUiTheme } from '@/hooks/use-ui-theme';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 import type { AppVariant } from '@/types';
 
 type Props = {
