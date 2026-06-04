@@ -13,6 +13,7 @@ import {
 import type { CSSProperties } from 'react';
 import { useUiTheme } from '@/hooks/use-ui-theme';
 import { dashboard, login, register } from '@/routes';
+import popQueryLogo from '../../../public/PopQuery-Logo.svg';
 
 type WelcomeProps = {
     canRegister: boolean;
@@ -122,7 +123,7 @@ export default function Welcome({ canRegister }: WelcomeProps) {
                         }}
                     >
                         <div className="flex items-center gap-3">
-                            <img src="/PopQuery-Logo.svg" alt="PopQuery" className="h-11 w-auto" />
+                            <img src={popQueryLogo} alt="PopQuery" className="h-11 w-auto" />
                             <div>
                                 <p
                                     className="text-[10px] font-semibold uppercase tracking-[0.34em]"
