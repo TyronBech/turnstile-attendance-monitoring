@@ -6,10 +6,7 @@ import { RecentActivityFeed } from '@/components/dashboard/recent-activity-feed'
 import { SmsStatusTable } from '@/components/dashboard/sms-status-table';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { TurnstileStatusList } from '@/components/dashboard/turnstile-status-list';
-import { OrgFooter } from '@/components/org-footer';
-import { OrgHeader } from '@/components/org-header';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useUiTheme } from '@/hooks/use-ui-theme';
 import type { DashboardProps } from '@/types/dashboard';
 
 export default function Dashboard({
@@ -19,8 +16,6 @@ export default function Dashboard({
     turnstiles,
     smsEntries,
 }: DashboardProps) {
-    const { palette, rgb } = useUiTheme();
-
     // Poll every 15 seconds to refresh the dashboard data
     usePoll(15_000);
 
@@ -28,17 +23,8 @@ export default function Dashboard({
         <>
             <Head title="Dashboard" />
 
-            <div
-                className="flex min-h-screen flex-col text-slate-900"
-                style={{
-                    background: `radial-gradient(circle at top left, ${rgb(palette.secondary['100'])} 0%, ${rgb(palette.secondary['50'])} 42%, ${rgb(palette.primary['50'])} 100%)`,
-                }}
-            >
-                <OrgHeader variant="inside" maxWidth="max-w-7xl" />
-
-                {/* Dashboard content */}
-                <main className="flex-1 px-6 py-10 md:px-10">
-                    <div className="mx-auto max-w-7xl space-y-6">
+            <div className="px-6 py-10 md:px-10">
+                <div className="space-y-6">
                         {/* KPI Cards Row */}
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                             <StatCard
@@ -161,10 +147,7 @@ export default function Dashboard({
                             </Deferred>
                         </div>
                     </div>
-                </main>
-
-                <OrgFooter maxWidth="max-w-7xl" />
-            </div>
+                </div>
         </>
     );
 }
