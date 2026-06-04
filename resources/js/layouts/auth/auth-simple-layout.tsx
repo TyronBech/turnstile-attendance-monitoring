@@ -85,7 +85,17 @@ export default function AuthSimpleLayout({
                 </div>
             </main>
 
-            <OrgFooter maxWidth="max-w-5xl" />
+            <OrgFooter
+                maxWidth="max-w-5xl"
+                secondaryContent={
+                    <p>
+                        Powered by{' '}
+                        <span className="font-semibold text-white">
+                            PopQuery
+                        </span>
+                    </p>
+                }
+            />
         </div>
     );
 }

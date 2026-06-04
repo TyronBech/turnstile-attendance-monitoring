@@ -7,15 +7,18 @@ use Laravel\Fortify\Features;
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
 
-    $response->assertOk();
+    $response
+        ->assertOk()
+        ->assertSeeInOrder(['Powered by', 'PopQuery']);
 });
 
-test('login screen keeps dark appearance context when requested', function (): void {
+test('login screen ignores appearance cookies and stays in light mode', function (): void {
     $response = $this->withUnencryptedCookies(['appearance' => 'dark'])->get(route('login'));
 
     $response
         ->assertOk()
-        ->assertSee('<html lang="en" class="dark">', false);
+        ->assertDontSee('<html lang="en" class="dark">', false)
+        ->assertDontSee('matchMedia(\'(prefers-color-scheme: dark)\')', false);
 });
 
 test('users can authenticate using the login screen', function () {
