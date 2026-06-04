@@ -121,7 +121,7 @@ export default function Welcome({ canRegister }: WelcomeProps) {
 
     return (
         <>
-            <Head title="PopQuery" />
+            <Head title="Welcome" />
 
             <div
                 className="min-h-screen"
