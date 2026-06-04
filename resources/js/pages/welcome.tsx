@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { useUiTheme } from '@/hooks/use-ui-theme';
-import { dashboard, login } from '@/routes';
+import { dashboard, login, register } from '@/routes';
 
 type WelcomeProps = {
     canRegister: boolean;
@@ -86,7 +86,7 @@ const workSteps: WorkStep[] = [
     },
 ];
 
-export default function Welcome({ canRegister: _canRegister }: WelcomeProps) {
+export default function Welcome({ canRegister }: WelcomeProps) {
     const page = usePage();
     const { auth } = page.props as { auth: { user?: { name?: string } | null } };
     const { palette, rgb } = useUiTheme();
@@ -204,6 +204,19 @@ export default function Welcome({ canRegister: _canRegister }: WelcomeProps) {
                                     {auth.user ? 'Open Dashboard' : 'Launch Dashboard'}
                                     <ChevronRight className="size-4" />
                                 </Link>
+                                {canRegister && !auth.user ? (
+                                    <Link
+                                        href={register()}
+                                        className="inline-flex items-center justify-center rounded-full border px-6 py-3.5 text-base font-semibold"
+                                        style={{
+                                            borderColor: rgb(palette.primary['200']),
+                                            color: rgb(palette.primary['700']),
+                                            backgroundColor: rgb(palette.secondary['50'], 0.72),
+                                        }}
+                                    >
+                                        Create Account
+                                    </Link>
+                                ) : null}
                                 <a
                                     href="#features"
                                     className="inline-flex items-center justify-center rounded-full border px-6 py-3.5 text-base font-semibold"
