@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\UiSetting;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
@@ -65,4 +66,53 @@ test('dashboard falls back to default theme colors when ui settings are missing 
             ->where('uiSettings.themePalette.primary.500', '32 36 107')
             ->where('uiSettings.logoUrl', null)
         );
+});
+
+test('app root template renders custom favicon if configured', function (): void {
+    $png = base64_decode(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Z0MsAAAAASUVORK5CYII=',
+        true,
+    );
+
+    DB::table('ui_settings')->insert([
+        'org_name' => 'Sto. Nino Catholic School, Inc.',
+        'org_initial' => 'SNCS',
+        'org_address' => 'Signal Village, Taguig City',
+        'org_logo' => $png,
+        'org_logo_full' => 'logo-full',
+        'email' => 'sncslib@sncstaguig.com',
+        'contact_number' => '(02) 8252-9613-000',
+        'social_links' => json_encode(['facebook' => 'https://facebook.com/sncs'], JSON_THROW_ON_ERROR),
+        'theme_colors' => json_encode([
+            'primary' => '#e01a1c',
+            'secondary' => '#f7f7f7',
+            'tertiary' => '#ffcf01',
+        ], JSON_THROW_ON_ERROR),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('view_dashboard');
+
+    $response = $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk();
+
+    $logoUrl = UiSetting::primary()?->getLogoDataUrl();
+    expect($logoUrl)->not->toBeNull();
+    $response->assertSee($logoUrl, false);
+    $response->assertDontSee('/favicon.ico', false);
+});
+
+test('app root template renders default favicon if not configured', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('view_dashboard');
+
+    $response = $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk();
+
+    $response->assertSee('/favicon.ico', false);
+    $response->assertDontSee('data:image/', false);
 });
