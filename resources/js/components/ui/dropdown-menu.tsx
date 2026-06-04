@@ -2,6 +2,7 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 import * as React from "react"
 
+import { useUiTheme } from "@/hooks/use-ui-theme"
 import { cn } from "@/lib/utils"
 
 function DropdownMenu({
@@ -34,6 +35,8 @@ function DropdownMenuContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+  const { palette, rgb } = useUiTheme()
+
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
@@ -43,6 +46,12 @@ function DropdownMenuContent({
           "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 shadow-md",
           className
         )}
+        style={{
+          backgroundColor: rgb(palette.secondary['50']),
+          color: rgb(palette.primary['800']),
+          borderColor: rgb(palette.primary['200']),
+          boxShadow: `0 24px 60px ${rgb(palette.primary['900'], 0.18)}`,
+        }}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -66,6 +75,8 @@ function DropdownMenuItem({
   inset?: boolean
   variant?: "default" | "destructive"
 }) {
+  const { palette, rgb } = useUiTheme()
+
   return (
     <DropdownMenuPrimitive.Item
       data-slot="dropdown-menu-item"
@@ -75,6 +86,13 @@ function DropdownMenuItem({
         "focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive-foreground data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/40 data-[variant=destructive]:focus:text-destructive-foreground data-[variant=destructive]:*:[svg]:!text-destructive-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
+      style={variant === "destructive"
+        ? undefined
+        : {
+            color: rgb(palette.primary['800']),
+            ['--dropdown-hover-bg' as string]: rgb(palette.primary['700'], 0.12),
+            ['--dropdown-hover-fg' as string]: rgb(palette.primary['700']),
+          }}
       {...props}
     />
   )
@@ -148,6 +166,8 @@ function DropdownMenuLabel({
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Label> & {
   inset?: boolean
 }) {
+  const { palette, rgb } = useUiTheme()
+
   return (
     <DropdownMenuPrimitive.Label
       data-slot="dropdown-menu-label"
@@ -156,6 +176,9 @@ function DropdownMenuLabel({
         "px-2 py-1.5 text-sm font-medium data-[inset]:pl-8",
         className
       )}
+      style={{
+        color: rgb(palette.primary['800']),
+      }}
       {...props}
     />
   )
@@ -165,10 +188,15 @@ function DropdownMenuSeparator({
   className,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
+  const { palette, rgb } = useUiTheme()
+
   return (
     <DropdownMenuPrimitive.Separator
       data-slot="dropdown-menu-separator"
       className={cn("bg-border -mx-1 my-1 h-px", className)}
+      style={{
+        backgroundColor: rgb(palette.primary['100']),
+      }}
       {...props}
     />
   )

@@ -6,6 +6,7 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 
@@ -17,6 +18,7 @@ export default function Profile({
     status?: string;
 }) {
     const { auth } = usePage().props;
+    const { palette, rgb } = useUiTheme();
 
     return (
         <>
@@ -40,12 +42,21 @@ export default function Profile({
                 >
                     {({ processing, errors }) => (
                         <>
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div
+                                className="grid grid-cols-1 gap-6 rounded-[1.5rem] border p-5 sm:grid-cols-2"
+                                style={{
+                                    backgroundColor: rgb(palette.secondary['50'], 0.72),
+                                    borderColor: rgb(palette.primary['100']),
+                                }}
+                            >
                                 <div className="grid gap-2">
                                     <Label htmlFor="student_id">Student ID</Label>
                                     <Input
                                         id="student_id"
-                                        className="mt-1 block w-full"
+                                        className="mt-1 block h-11 w-full rounded-xl"
+                                        style={{
+                                            borderColor: rgb(palette.primary['200']),
+                                        }}
                                         defaultValue={auth.user.student_id}
                                         name="student_id"
                                         required
@@ -58,7 +69,10 @@ export default function Profile({
                                     <Label htmlFor="rfid">RFID Tag</Label>
                                     <Input
                                         id="rfid"
-                                        className="mt-1 block w-full"
+                                        className="mt-1 block h-11 w-full rounded-xl"
+                                        style={{
+                                            borderColor: rgb(palette.primary['200']),
+                                        }}
                                         defaultValue={auth.user.rfid}
                                         name="rfid"
                                         required
@@ -71,7 +85,10 @@ export default function Profile({
                                     <Label htmlFor="first_name">First Name</Label>
                                     <Input
                                         id="first_name"
-                                        className="mt-1 block w-full"
+                                        className="mt-1 block h-11 w-full rounded-xl"
+                                        style={{
+                                            borderColor: rgb(palette.primary['200']),
+                                        }}
                                         defaultValue={auth.user.first_name}
                                         name="first_name"
                                         required
@@ -84,7 +101,10 @@ export default function Profile({
                                     <Label htmlFor="middle_name">Middle Name</Label>
                                     <Input
                                         id="middle_name"
-                                        className="mt-1 block w-full"
+                                        className="mt-1 block h-11 w-full rounded-xl"
+                                        style={{
+                                            borderColor: rgb(palette.primary['200']),
+                                        }}
                                         defaultValue={auth.user.middle_name || ''}
                                         name="middle_name"
                                         placeholder="Middle Name (Optional)"
@@ -96,7 +116,10 @@ export default function Profile({
                                     <Label htmlFor="last_name">Last Name</Label>
                                     <Input
                                         id="last_name"
-                                        className="mt-1 block w-full"
+                                        className="mt-1 block h-11 w-full rounded-xl"
+                                        style={{
+                                            borderColor: rgb(palette.primary['200']),
+                                        }}
                                         defaultValue={auth.user.last_name}
                                         name="last_name"
                                         required
@@ -109,7 +132,10 @@ export default function Profile({
                                     <Label htmlFor="guardian_name">Guardian Name</Label>
                                     <Input
                                         id="guardian_name"
-                                        className="mt-1 block w-full"
+                                        className="mt-1 block h-11 w-full rounded-xl"
+                                        style={{
+                                            borderColor: rgb(palette.primary['200']),
+                                        }}
                                         defaultValue={auth.user.guardian_name}
                                         name="guardian_name"
                                         required
@@ -122,7 +148,10 @@ export default function Profile({
                                     <Label htmlFor="guardian_contact_number">Guardian Contact #</Label>
                                     <Input
                                         id="guardian_contact_number"
-                                        className="mt-1 block w-full"
+                                        className="mt-1 block h-11 w-full rounded-xl"
+                                        style={{
+                                            borderColor: rgb(palette.primary['200']),
+                                        }}
                                         defaultValue={auth.user.guardian_contact_number}
                                         name="guardian_contact_number"
                                         required
@@ -132,13 +161,22 @@ export default function Profile({
                                 </div>
                             </div>
 
-                            <div className="grid gap-2">
+                            <div
+                                className="grid gap-2 rounded-[1.25rem] border p-5"
+                                style={{
+                                    backgroundColor: rgb(palette.secondary['50'], 0.72),
+                                    borderColor: rgb(palette.primary['100']),
+                                }}
+                            >
                                 <Label htmlFor="email">Email address</Label>
 
                                 <Input
                                     id="email"
                                     type="email"
-                                    className="mt-1 block w-full"
+                                    className="mt-1 block h-11 w-full rounded-xl"
+                                    style={{
+                                        borderColor: rgb(palette.primary['200']),
+                                    }}
                                     defaultValue={auth.user.email}
                                     name="email"
                                     required
@@ -160,7 +198,8 @@ export default function Profile({
                                             <Link
                                                 href={send()}
                                                 as="button"
-                                                className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
+                                                className="font-medium underline underline-offset-4 transition-colors duration-300 ease-out"
+                                                style={{ color: rgb(palette.primary['700']) }}
                                             >
                                                 Click here to resend the
                                                 verification email.
@@ -181,6 +220,11 @@ export default function Profile({
                                 <Button
                                     disabled={processing}
                                     data-test="update-profile-button"
+                                    className="h-11 rounded-xl px-5 shadow-none"
+                                    style={{
+                                        backgroundColor: rgb(palette.primary['700']),
+                                        color: rgb(palette.secondary['50']),
+                                    }}
                                 >
                                     Save
                                 </Button>

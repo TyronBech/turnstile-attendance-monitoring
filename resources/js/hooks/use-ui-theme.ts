@@ -85,13 +85,52 @@ const rgb = (channels: string, alpha?: number): string => {
         : `rgb(${channels} / ${alpha})`;
 };
 
+const parseChannels = (channels: string): [number, number, number] => {
+    const [red = '0', green = '0', blue = '0'] = channels.trim().split(/\s+/);
+
+    return [Number(red), Number(green), Number(blue)];
+};
+
+const toRelativeLuminance = (channel: number): number => {
+    const normalized = channel / 255;
+
+    return normalized <= 0.03928
+        ? normalized / 12.92
+        : ((normalized + 0.055) / 1.055) ** 2.4;
+};
+
+const isLightColor = (channels: string): boolean => {
+    const [red, green, blue] = parseChannels(channels);
+    const luminance = (0.2126 * toRelativeLuminance(red))
+        + (0.7152 * toRelativeLuminance(green))
+        + (0.0722 * toRelativeLuminance(blue));
+
+    return luminance > 0.6;
+};
+
 export function useUiTheme() {
     const { uiSettings } = usePage().props as { uiSettings?: UiSettingsTheme };
     const theme = uiSettings ?? defaultTheme;
+    const getReadableText = (
+        backgroundChannels: string,
+        options?: {
+            darkChannels?: string;
+            lightChannels?: string;
+            alpha?: number;
+        },
+    ): string => {
+        const darkChannels = options?.darkChannels ?? theme.themePalette.primary['900'];
+        const lightChannels = options?.lightChannels ?? theme.themePalette.secondary['50'];
+        const textChannels = isLightColor(backgroundChannels) ? darkChannels : lightChannels;
+
+        return rgb(textChannels, options?.alpha);
+    };
 
     return {
         theme,
         rgb,
+        isLightColor,
+        getReadableText,
         colors: theme.themeColors,
         palette: theme.themePalette,
         orgName: theme.orgName ?? 'Turnstile Attendance Monitoring',

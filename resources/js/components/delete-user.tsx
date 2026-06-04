@@ -14,10 +14,12 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 import { Label } from '@/components/ui/label';
 
 export default function DeleteUser() {
     const passwordInput = useRef<HTMLInputElement>(null);
+    const { palette, rgb } = useUiTheme();
 
     return (
         <div className="space-y-6">
@@ -26,8 +28,14 @@ export default function DeleteUser() {
                 title="Delete account"
                 description="Delete your account and all of its resources"
             />
-            <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
-                <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
+            <div
+                className="space-y-4 rounded-[1.5rem] border p-5"
+                style={{
+                    backgroundColor: 'rgb(254 242 242 / 0.92)',
+                    borderColor: 'rgb(254 202 202 / 0.95)',
+                }}
+            >
+                <div className="relative space-y-0.5" style={{ color: 'rgb(185 28 28)' }}>
                     <p className="font-medium">Warning</p>
                     <p className="text-sm">
                         Please proceed with caution, this cannot be undone.
@@ -39,6 +47,7 @@ export default function DeleteUser() {
                         <Button
                             variant="destructive"
                             data-test="delete-user-button"
+                            className="rounded-xl shadow-none"
                         >
                             Delete account
                         </Button>
@@ -91,6 +100,11 @@ export default function DeleteUser() {
                                                 onClick={() =>
                                                     resetAndClearErrors()
                                                 }
+                                                className="rounded-xl"
+                                                style={{
+                                                    backgroundColor: rgb(palette.primary['100']),
+                                                    color: rgb(palette.primary['700']),
+                                                }}
                                             >
                                                 Cancel
                                             </Button>

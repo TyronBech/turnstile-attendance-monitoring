@@ -31,6 +31,7 @@ import {
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
+import { useUiTheme } from '@/hooks/use-ui-theme';
 import { cn, toUrl } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
@@ -68,10 +69,17 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { auth } = page.props;
     const getInitials = useInitials();
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+    const { palette, rgb } = useUiTheme();
 
     return (
         <>
-            <div className="border-b border-sidebar-border/80">
+            <div
+                className="border-b"
+                style={{
+                    background: `linear-gradient(180deg, ${rgb(palette.secondary['50'])} 0%, ${rgb(palette.secondary['100'], 0.78)} 100%)`,
+                    borderColor: rgb(palette.primary['100']),
+                }}
+            >
                 <div className="mx-auto flex h-16 items-center px-4 md:max-w-7xl">
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
@@ -93,7 +101,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     Navigation menu
                                 </SheetTitle>
                                 <SheetHeader className="flex justify-start text-left">
-                                    <AppLogoIcon className="h-6 w-6 fill-current text-black dark:text-white" />
+                                    <AppLogo />
                                 </SheetHeader>
                                 <div className="flex h-full flex-1 flex-col space-y-4 p-4">
                                     <div className="flex h-full flex-col justify-between text-sm">
@@ -103,6 +111,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                     key={item.title}
                                                     href={item.href}
                                                     className="flex items-center space-x-2 font-medium"
+                                                    style={{ color: rgb(palette.primary['800']) }}
                                                 >
                                                     {item.icon && (
                                                         <item.icon className="h-5 w-5" />
@@ -120,6 +129,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="flex items-center space-x-2 font-medium"
+                                                    style={{ color: rgb(palette.primary['700']) }}
                                                 >
                                                     {item.icon && (
                                                         <item.icon className="h-5 w-5" />
@@ -161,6 +171,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 ),
                                                 'h-9 cursor-pointer px-3',
                                             )}
+                                            style={{
+                                                color: isCurrentUrl(item.href)
+                                                    ? rgb(palette.primary['800'])
+                                                    : rgb(palette.primary['700']),
+                                            }}
                                         >
                                             {item.icon && (
                                                 <item.icon className="mr-2 h-4 w-4" />
@@ -169,6 +184,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         </Link>
                                         {isCurrentUrl(item.href) && (
                                             <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
+                                            
                                         )}
                                     </NavigationMenuItem>
                                 ))}
@@ -182,6 +198,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                 variant="ghost"
                                 size="icon"
                                 className="group h-9 w-9 cursor-pointer"
+                                style={{ color: rgb(palette.primary['700']) }}
                             >
                                 <Search className="!size-5 opacity-80 group-hover:opacity-100" />
                             </Button>
@@ -194,6 +211,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="group inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-accent-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+                                                style={{ color: rgb(palette.primary['700']) }}
                                             >
                                                 <span className="sr-only">
                                                     {item.title}
@@ -222,6 +240,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                             alt={auth.user?.name}
                                         />
                                         <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                        
                                             {getInitials(auth.user?.name ?? '')}
                                         </AvatarFallback>
                                     </Avatar>
