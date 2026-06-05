@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\RfidScanController;
 use App\Http\Middleware\EnsureJsonRequest;
 use App\Http\Middleware\EnsureTurnstileIsActive;
 use Illuminate\Http\JsonResponse;
@@ -25,6 +26,9 @@ use Illuminate\Support\Facades\Route;
 | 4. POST /api/v1/attendance/scan with body: { "rfid": "<student_rfid>" }
 |
 */
+
+Route::match(['get', 'post'], '/rfid/scan', [RfidScanController::class, 'store'])
+    ->name('api.rfid.scan');
 
 Route::prefix('v1')->middleware([EnsureJsonRequest::class])->group(function (): void {
 
