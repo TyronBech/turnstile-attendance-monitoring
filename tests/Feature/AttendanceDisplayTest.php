@@ -12,8 +12,8 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
-test('guests are redirected to login before viewing attendance display', function (): void {
-    $this->get(route('attendance-display'))->assertRedirect(route('login'));
+test('guests can view the attendance display page', function (): void {
+    $this->get(route('attendance-display'))->assertOk();
 });
 
 test('attendance display page shows recent tap panels to authenticated users', function (): void {
