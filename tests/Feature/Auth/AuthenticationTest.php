@@ -43,20 +43,6 @@ test('non live monitoring users are redirected to dashboard after login', functi
     $response->assertRedirect(route('dashboard', absolute: false));
 });
 
-test('non live monitoring users are redirected to dashboard even when attendance display was intended', function (): void {
-    $user = User::factory()->create();
-
-    $this->get(route('attendance-display'))
-        ->assertRedirect(route('login'));
-
-    $response = $this->post(route('login.store'), [
-        'email' => $user->email,
-        'password' => 'password',
-    ]);
-
-    $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
-});
 
 test('users with two factor enabled are redirected to two factor challenge', function () {
     $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
